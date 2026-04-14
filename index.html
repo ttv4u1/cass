@@ -2,366 +2,357 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoltStream Pro - AI Battery Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FiRCHARGE | Sonic Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@700&family=Outfit:wght@400;900&display=swap" rel="stylesheet">
     
-    <!-- Version Tracking -->
-    <!-- Web Version: 1.0.2 -->
-    <!-- Android Build: 1.0.2-v24 -->
-
     <style>
-        :root {
-            --bg-dark: #05070a;
-            --card-dark: rgba(17, 25, 40, 0.75);
-            --accent-blue: #00d2ff;
-            --accent-green: #39ff14;
+        :root { --bg-dark: #020408; --neon: #00d2ff; --energy: #39ff14; }
+        body { font-family: 'Outfit', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .sketch-font { font-family: 'Architects Daughter', cursive; }
+        .calligraphy { font-family: 'Caveat', cursive; }
+
+        .dark-mode { background-color: var(--bg-dark); color: #eceef2; }
+        .light-mode { background-color: #f0f2f5; color: #1a1a1b; }
+
+        /* Lock Screen HUD */
+        #usb-lock {
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(circle at center, #0a1122 0%, #000 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .lock-off { opacity: 0; visibility: hidden; transform: scale(1.2); pointer-events: none; }
+
+        /* Futuristic Box Blueprint */
+        .box-container {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 1.2rem; padding: 1.5rem;
+            position: relative; overflow: hidden;
+            transition: 0.4s;
+        }
+        .light-mode .box-container { background: #fff; border-color: rgba(0, 0, 0, 0.05); }
+
+        /* Realistic Energy Animation */
+        .energy-core {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(0deg, rgba(0, 210, 255, 0.3) 0%, transparent 100%);
+            transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
         }
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow-x: hidden;
+        .plasma-pulse {
+            position: absolute; width: 100%; height: 4px;
+            background: var(--neon);
+            box-shadow: 0 0 20px var(--neon);
+            filter: blur(2px);
+            animation: scan 3s infinite linear;
+            opacity: 0;
+        }
+        .charging .plasma-pulse { opacity: 0.6; }
+
+        @keyframes scan {
+            0% { bottom: 0%; opacity: 0; }
+            50% { opacity: 1; }
+            100% { bottom: 100%; opacity: 0; }
         }
 
-        .dark-mode {
-            background-color: var(--bg-dark);
-            color: white;
+        /* Particles */
+        .particle {
+            position: absolute; width: 2px; height: 2px;
+            background: white; border-radius: 50%;
+            animation: float 4s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-100px) scale(0); opacity: 0; }
         }
 
-        .light-mode {
-            background-color: #f0f2f5;
-            color: #1a1a1a;
-        }
+        .bat-text { font-size: clamp(4rem, 18vw, 8rem); font-weight: 900; letter-spacing: -5px; position: relative; z-index: 10; }
+        .write { clip-path: inset(0 100% 0 0); animation: writeIn 1.5s ease-out forwards; }
+        @keyframes writeIn { to { clip-path: inset(0 0 0 0); } }
 
-        .glass-card {
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-        }
-
-        .light-mode .glass-card {
-            background-color: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(209, 213, 219, 0.3);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
-        }
-
-        .dark-mode .glass-card {
-            background-color: var(--card-dark);
-        }
-
-        /* 3D Icon Glow */
-        .icon-3d {
-            filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.2));
-            transform: perspective(500px) rotateX(10deg);
-        }
-
-        /* Charging Pulse Animation */
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 5px var(--accent-green); }
-            50% { box-shadow: 0 0 20px var(--accent-green); }
-            100% { box-shadow: 0 0 5px var(--accent-green); }
-        }
-
-        .charging-active {
-            animation: pulse-glow 2s infinite;
-        }
-
-        #usb-overlay {
-            display: none;
-            backdrop-filter: blur(20px);
-            z-index: 100;
-        }
-
-        .status-pill {
-            padding: 4px 12px;
-            border-radius: 99px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
+        .charging-glow { animation: glow 2s infinite alternate; }
+        @keyframes glow { from { filter: drop-shadow(0 0 5px var(--neon)); } to { filter: drop-shadow(0 0 20px var(--neon)); } }
     </style>
 </head>
-<body class="dark-mode min-h-screen">
+<body class="dark-mode" onclick="initAudio()">
 
-    <!-- USB PLUG-IN OVERLAY -->
-    <div id="usb-overlay" class="fixed inset-0 flex flex-col items-center justify-center bg-black/80 text-white p-6 text-center">
-        <svg class="w-32 h-32 mb-6 icon-3d" viewBox="0 0 100 100">
-            <defs>
-                <linearGradient id="usbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#00d2ff;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#3a7bd5;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-            <path fill="url(#usbGrad)" d="M30,20 L70,20 L70,40 L30,40 Z M40,40 L60,40 L60,80 L40,80 Z" />
-            <circle cx="50" cy="90" r="5" fill="#39ff14" />
-        </svg>
-        <h1 class="text-3xl font-bold mb-2" id="msg-connect">Please Connect USB Charger</h1>
-        <p class="opacity-70" id="msg-sub-connect">Real-time diagnostics require an active power source.</p>
+    <!-- USB HARDWARE LOCK HUD -->
+    <div id="usb-lock">
+        <div class="relative">
+            <svg class="w-24 h-24 mb-6" viewBox="0 0 100 100">
+                <path d="M30 30h40v40H30z" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                <path id="lock-bolt" d="M50 20v20M40 30h20" stroke="var(--neon)" stroke-width="4" stroke-linecap="round" class="animate-pulse"/>
+                <circle cx="50" cy="80" r="4" fill="var(--energy)" class="animate-ping"/>
+            </svg>
+        </div>
+        <h1 class="text-2xl sketch-font text-white write" id="lock-msg">Awaiting Power Link...</h1>
+        <p class="calligraphy text-xl text-blue-400 opacity-50">v1.1.4 Sonic System</p>
+        <p class="text-[10px] uppercase tracking-widest mt-8 opacity-40">Tap screen to enable audio feedback</p>
     </div>
 
-    <!-- MAIN DASHBOARD -->
-    <main class="max-w-4xl mx-auto p-4 md:p-8">
+    <main class="max-w-5xl mx-auto p-4 md:p-10">
         
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-10">
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight">VOLT<span class="text-blue-500">STREAM</span></h1>
-                <p class="text-xs opacity-50" id="v-label">Version 1.0.2-Stable</p>
+        <header class="flex justify-between items-center mb-8">
+            <div class="border-l-4 border-blue-500 pl-4">
+                <h1 class="text-3xl font-black tracking-tighter">FiR<span class="text-blue-500">CHARGE</span></h1>
+                <p class="text-[10px] sketch-font text-blue-400 opacity-60 uppercase tracking-[0.3em]">Neural Interface v1.1.4</p>
             </div>
-            
-            <div class="flex gap-3">
-                <button onclick="toggleLang()" class="glass-card px-4 py-2 text-sm font-bold hover:scale-105 transition-transform">
+            <div class="flex gap-2">
+                <button onclick="toggleLang()" class="box-container py-1 px-4 text-xs font-bold sketch-font uppercase hover:bg-white/10 transition">
                     <span id="lang-btn">BM</span>
                 </button>
-                <button onclick="toggleTheme()" class="glass-card px-4 py-2 text-sm font-bold hover:scale-105 transition-transform">
+                <button onclick="toggleTheme()" class="box-container py-1 px-3 text-xl hover:scale-110 transition">
                     <span id="theme-icon">🌞</span>
                 </button>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5" id="dashboard">
             
-            <!-- Battery Percentage Card -->
-            <div class="glass-card p-8 flex flex-col items-center justify-center md:col-span-1 relative overflow-hidden">
+            <!-- Energy Core Display -->
+            <div class="box-container md:col-span-5 min-h-[380px] flex flex-col items-center justify-center" id="main-core">
+                <div class="energy-core" id="fluid">
+                    <div class="plasma-pulse"></div>
+                </div>
+                <div id="particle-container"></div>
+                
                 <div class="relative z-10 text-center">
-                    <span class="text-sm font-semibold opacity-60 uppercase tracking-widest" id="lbl-status">Charging</span>
-                    <div class="text-7xl font-black my-2" id="bat-level">0%</div>
-                    <div class="status-pill bg-green-500/20 text-green-400" id="bat-health-pill">Excellent Health</div>
+                    <p class="sketch-font text-sm opacity-50 uppercase tracking-widest write" id="lbl-status">Linking...</p>
+                    <div class="bat-text leading-none my-4 charging-glow" id="bat-level">0%</div>
+                    <div class="calligraphy text-3xl text-green-400" id="bat-health">System Optimized</div>
                 </div>
-                <!-- 3D Water Effect Background -->
-                <div id="wave-bg" class="absolute bottom-0 left-0 w-full bg-blue-500/10 transition-all duration-1000" style="height: 0%"></div>
             </div>
 
-            <!-- Stats Grid -->
-            <div class="md:col-span-2 grid grid-cols-2 gap-4">
-                <div class="glass-card p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center text-2xl icon-3d">🔥</div>
-                    <div>
-                        <p class="text-xs opacity-60" id="lbl-temp">Temperature</p>
-                        <p class="font-bold text-lg">34.2°C</p>
+            <!-- Telemetry Group -->
+            <div class="md:col-span-7 grid grid-cols-2 gap-5">
+                <div class="box-container">
+                    <div class="flex items-center gap-4">
+                        <span class="text-4xl filter drop-shadow-lg">🌡️</span>
+                        <div>
+                            <p class="sketch-font text-[10px] opacity-40 uppercase" id="lbl-temp">Thermal</p>
+                            <p class="text-2xl font-black">29.8°C</p>
+                        </div>
                     </div>
                 </div>
-                <div class="glass-card p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-2xl icon-3d">⚡</div>
-                    <div>
-                        <p class="text-xs opacity-60" id="lbl-volt">Voltage</p>
-                        <p class="font-bold text-lg">4.2V</p>
+
+                <div class="box-container">
+                    <div class="flex items-center gap-4">
+                        <span class="text-4xl filter drop-shadow-lg">⌛</span>
+                        <div>
+                            <p class="sketch-font text-[10px] opacity-40 uppercase" id="lbl-rem">Arrival</p>
+                            <p class="text-2xl font-black" id="bat-time">--</p>
+                        </div>
                     </div>
                 </div>
-                <div class="glass-card p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-2xl icon-3d">⏱️</div>
-                    <div>
-                        <p class="text-xs opacity-60" id="lbl-rem">Remaining</p>
-                        <p class="font-bold text-lg" id="bat-time">--</p>
-                    </div>
-                </div>
-                <div class="glass-card p-4 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center text-2xl icon-3d">🔋</div>
-                    <div>
-                        <p class="text-xs opacity-60" id="lbl-cap">Capacity</p>
-                        <p class="font-bold text-lg">5000mAh</p>
+
+                <!-- HUD Chart -->
+                <div class="box-container col-span-2 py-6">
+                    <h3 class="sketch-font text-xs opacity-40 uppercase mb-4 tracking-widest write" id="lbl-curve">Power Flow Blueprint</h3>
+                    <div class="h-40 w-full">
+                        <canvas id="chart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Chart Card -->
-            <div class="glass-card p-6 md:col-span-3">
-                <h3 class="text-lg font-bold mb-4" id="lbl-curve">Real-time Charging Curve</h3>
-                <div class="h-64 w-full">
-                    <canvas id="chargeChart"></canvas>
+            <!-- AI Insights -->
+            <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="box-container border-l-4 border-blue-500">
+                    <h4 class="sketch-font text-md font-bold text-blue-500 mb-2 uppercase" id="tip1-t">Longevity Protocol</h4>
+                    <p class="calligraphy text-xl opacity-70 leading-tight" id="tip1-d">Maintain cells at 80% to suppress chemical aging.</p>
                 </div>
-            </div>
-
-            <!-- Optimization Tips -->
-            <div class="md:col-span-3">
-                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span class="icon-3d">🚀</span> <span id="lbl-tips-title">Battery Optimization Tips</span>
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="glass-card p-4 text-sm">
-                        <p class="font-bold text-blue-400 mb-1" id="tip1-t">Smart Charge</p>
-                        <p class="opacity-70" id="tip1-d">Limit charging to 80% to prolong battery lifespan by up to 200%.</p>
-                    </div>
-                    <div class="glass-card p-4 text-sm">
-                        <p class="font-bold text-orange-400 mb-1" id="tip2-t">Thermal Control</p>
-                        <p class="opacity-70" id="tip2-d">Keep the device cool during charging. High heat degrades lithium cells.</p>
-                    </div>
+                <div class="box-container border-l-4 border-orange-500">
+                    <h4 class="sketch-font text-md font-bold text-orange-400 mb-2 uppercase" id="tip2-t">Thermal Shield</h4>
+                    <p class="calligraphy text-xl opacity-70 leading-tight" id="tip2-d">High-load tasks during charging destabilize ion flow.</p>
                 </div>
             </div>
         </div>
 
-        <footer class="mt-12 text-center text-xs opacity-40">
-            <p>© 2025 VoltStream AI. Web Build 1.0.2 | Android SDK 34 Wrapper Ready</p>
+        <footer class="mt-12 text-center opacity-30 sketch-font text-[9px] tracking-[0.5em] uppercase">
+            &copy; 2025 FiRCHARGE AI | Sonic Core v1.1.4-v30
         </footer>
     </main>
 
     <script>
         let isDarkMode = true;
         let currentLang = 'en';
-        let batteryChart;
-        let historyData = [0];
-        let labels = ["0s"];
+        let chart;
+        let chartData = Array(12).fill(0);
+        let audioCtx;
+        let isAudioInit = false;
 
-        const translations = {
+        const text = {
             en: {
-                connect: "Please Connect USB Charger",
-                subconnect: "Real-time diagnostics require an active power source.",
-                status: "Charging",
-                health: "Excellent Health",
-                temp: "Temperature",
-                volt: "Voltage",
-                rem: "Until Full",
-                cap: "Capacity",
-                curve: "Real-time Charging Curve",
-                tips: "Battery Optimization Tips",
-                tip1t: "Smart Charge",
-                tip1d: "Limit charging to 80% to prolong battery lifespan.",
-                tip2t: "Thermal Control",
-                tip2d: "Keep the device cool. Avoid heavy tasks while charging.",
-                full: "Battery Full"
+                lock: "Awaiting Power Link...",
+                status: "Live Stream",
+                health: "System Optimized",
+                temp: "Thermal",
+                rem: "Arrival",
+                curve: "Power Flow Blueprint",
+                tip1t: "Longevity Protocol",
+                tip1d: "Maintain cells at 80% to suppress chemical aging.",
+                tip2t: "Thermal Shield",
+                tip2d: "High-load tasks during charging destabilize ion flow.",
+                full: "100% Ready"
             },
             ms: {
-                connect: "Sila Sambung Pengecas USB",
-                subconnect: "Diagnostik masa nyata memerlukan sumber kuasa aktif.",
-                status: "Sedang Mengecas",
-                health: "Kesihatan Cemerlang",
-                temp: "Suhu",
-                volt: "Voltan",
-                rem: "Sehingga Penuh",
-                cap: "Kapasiti",
-                curve: "Lengkung Pengecasan Masa Nyata",
-                tips: "Tips Optimasi Bateri",
-                tip1t: "Caj Pintar",
-                tip1d: "Hadkan pengecasan ke 80% untuk memanjangkan hayat bateri.",
-                tip2t: "Kawalan Terma",
-                tip2d: "Pastikan peranti sejuk. Elakkan penggunaan berat semasa mengecas.",
-                full: "Bateri Penuh"
+                lock: "Menunggu Sambungan...",
+                status: "Aliran Langsung",
+                health: "Sistem Dioptimum",
+                temp: "Suhu Terma",
+                rem: "Ketibaan",
+                curve: "Blueprint Aliran Kuasa",
+                tip1t: "Protokol Hayat",
+                tip1d: "Kekalkan sel pada 80% untuk mengurangkan penuaan kimia.",
+                tip2t: "Perisai Terma",
+                tip2d: "Tugas berat semasa mengecas mengganggu aliran ion.",
+                full: "100% Sedia"
             }
         };
 
-        // Initialize Chart
+        // Synthesized Futuristic SFX
+        function playSfx(type) {
+            if(!isAudioInit) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if(type === 'connect') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+            }
+        }
+
+        function initAudio() {
+            if(!isAudioInit) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                isAudioInit = true;
+                // Initial beep to confirm audio
+                playSfx('connect');
+            }
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particle-container');
+            for(let i=0; i<15; i++) {
+                let p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 4 + 's';
+                container.appendChild(p);
+            }
+        }
+
         function initChart() {
-            const ctx = document.getElementById('chargeChart').getContext('2d');
-            batteryChart = new Chart(ctx, {
+            const ctx = document.getElementById('chart').getContext('2d');
+            chart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: Array(12).fill(''),
                     datasets: [{
-                        label: 'Battery Level %',
-                        data: historyData,
+                        data: chartData,
                         borderColor: '#00d2ff',
-                        backgroundColor: 'rgba(0, 210, 255, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.5,
+                        pointRadius: 0,
                         fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 0
+                        backgroundColor: 'rgba(0, 210, 255, 0.05)'
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: { legend: { display: false } }
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false, min: 0, max: 100 }, x: { display: false } }
                 }
             });
         }
 
-        async function updateBatteryStatus() {
+        async function monitor() {
             const battery = await navigator.getBattery();
-            
-            function updateUI() {
+            let lastCharging = battery.charging;
+
+            const update = () => {
+                const charging = battery.charging;
                 const level = Math.round(battery.level * 100);
-                
-                // USB Plugin Check
-                if (!battery.charging) {
-                    document.getElementById('usb-overlay').style.display = 'flex';
-                } else {
-                    document.getElementById('usb-overlay').style.display = 'none';
+
+                // Sound Effect Logic
+                if (charging !== lastCharging) {
+                    charging ? playSfx('connect') : playSfx('disconnect');
+                    lastCharging = charging;
                 }
 
-                // Update text
+                document.getElementById('usb-lock').className = charging ? 'lock-off' : '';
+                document.getElementById('main-core').className = charging ? 'box-container md:col-span-5 min-h-[380px] flex flex-col items-center justify-center charging' : 'box-container md:col-span-5 min-h-[380px] flex flex-col items-center justify-center';
+                
                 document.getElementById('bat-level').innerText = level + '%';
-                document.getElementById('wave-bg').style.height = level + '%';
-                
-                // Time calculation
-                if (battery.charging && battery.chargingTime !== Infinity) {
-                    const mins = Math.floor(battery.chargingTime / 60);
-                    document.getElementById('bat-time').innerText = mins + " min";
-                } else if (level >= 100) {
-                    document.getElementById('bat-time').innerText = translations[currentLang].full;
+                document.getElementById('fluid').style.height = level + '%';
+                document.getElementById('lbl-status').innerText = charging ? text[currentLang].status : "Link Severed";
+
+                if (charging && battery.chargingTime !== Infinity) {
+                    const m = Math.floor(battery.chargingTime / 60);
+                    document.getElementById('bat-time').innerText = m + "m";
                 } else {
-                    document.getElementById('bat-time').innerText = "--";
+                    document.getElementById('bat-time').innerText = level >= 100 ? text[currentLang].full : "--";
                 }
 
-                // Update Chart
-                const now = new Date();
-                const timeStr = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-                
-                if (historyData.length > 20) {
-                    historyData.shift();
-                    labels.shift();
-                }
-                historyData.push(level);
-                labels.push(timeStr);
-                batteryChart.update();
-            }
-
-            updateUI();
-            battery.addEventListener('chargingchange', updateUI);
-            battery.addEventListener('levelchange', updateUI);
-            battery.addEventListener('chargingtimechange', updateUI);
+                chartData.push(level);
+                chartData.shift();
+                chart.update();
+            };
+            
+            update();
+            battery.addEventListener('chargingchange', update);
+            battery.addEventListener('levelchange', update);
         }
 
         function toggleTheme() {
             isDarkMode = !isDarkMode;
-            const body = document.body;
-            const btn = document.getElementById('theme-icon');
-            
-            if (isDarkMode) {
-                body.classList.replace('light-mode', 'dark-mode');
-                btn.innerText = '🌞';
-            } else {
-                body.classList.replace('dark-mode', 'light-mode');
-                btn.innerText = '🌙';
-            }
+            document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
+            document.getElementById('theme-icon').innerText = isDarkMode ? '🌞' : '🌙';
         }
 
         function toggleLang() {
             currentLang = currentLang === 'en' ? 'ms' : 'en';
-            const t = translations[currentLang];
-            
+            const t = text[currentLang];
             document.getElementById('lang-btn').innerText = currentLang === 'en' ? 'BM' : 'EN';
-            document.getElementById('msg-connect').innerText = t.connect;
-            document.getElementById('msg-sub-connect').innerText = t.subconnect;
-            document.getElementById('lbl-status').innerText = t.status;
-            document.getElementById('bat-health-pill').innerText = t.health;
+            document.getElementById('lock-msg').innerText = t.lock;
+            document.getElementById('bat-health').innerText = t.health;
             document.getElementById('lbl-temp').innerText = t.temp;
-            document.getElementById('lbl-volt').innerText = t.volt;
             document.getElementById('lbl-rem').innerText = t.rem;
-            document.getElementById('lbl-cap').innerText = t.cap;
             document.getElementById('lbl-curve').innerText = t.curve;
-            document.getElementById('lbl-tips-title').innerText = t.tips;
             document.getElementById('tip1-t').innerText = t.tip1t;
             document.getElementById('tip1-d').innerText = t.tip1d;
             document.getElementById('tip2-t').innerText = t.tip2t;
             document.getElementById('tip2-d').innerText = t.tip2d;
+            
+            document.querySelectorAll('.write').forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight; 
+                el.style.animation = null;
+            });
         }
 
         window.onload = () => {
             initChart();
-            updateBatteryStatus();
-            // Start periodic chart updates to simulate "live" pulse
-            setInterval(() => {
-                if (batteryChart.data.datasets[0].data.length > 0) {
-                    batteryChart.update();
-                }
-            }, 3000);
+            monitor();
+            createParticles();
         };
     </script>
 </body>
