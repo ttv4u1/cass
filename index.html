@@ -6,11 +6,11 @@
     
     <!-- 
         FiRCHARGE VERSION TRACKING 
-        WEB: 1.4.3-Sonic-AI
-        ANDROID: 1.4.3-v39
+        WEB: 1.4.4-Precision
+        ANDROID: 1.4.4-v40
     -->
     
-    <title>FiRCHARGE Pro | Sonic AI v1.4.3</title>
+    <title>FiRCHARGE Pro | Precision v1.4.4</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -104,16 +104,16 @@
             </svg>
         </div>
         <h1 class="text-2xl font-black uppercase sketch-font animate-sketch" id="lock-title">Initialize Power Link</h1>
-        <p class="calligraphy text-xl opacity-60 mt-2">v1.4.3 Sonic AI Protector</p>
+        <p class="calligraphy text-xl opacity-60 mt-2">v1.4.4 Precision Engine</p>
     </div>
 
     <!-- DETAIL MODAL -->
     <div id="detail-overlay" onclick="closeDetail()">
         <div class="box-container max-w-lg w-full bg-black/90 border-accent p-10 text-center" onclick="event.stopPropagation()">
             <div id="modal-icon" class="text-6xl mb-6">🔍</div>
-            <h2 id="modal-title" class="sketch-font text-3xl text-blue-400 mb-4">Neural Intel</h2>
+            <h2 id="modal-title" class="sketch-font text-3xl text-blue-400 mb-4">Precision Intel</h2>
             <p id="modal-desc" class="calligraphy text-2xl opacity-90 leading-relaxed"></p>
-            <button onclick="closeDetail()" class="mt-8 px-10 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">Acknowledge</button>
+            <button onclick="closeDetail()" class="mt-8 px-10 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">Close Interface</button>
         </div>
     </div>
 
@@ -124,7 +124,7 @@
             <div class="box-container flex flex-row items-center gap-4 w-full md:w-auto">
                 <div>
                     <h1 class="text-2xl font-black">FiR<span style="color:var(--accent)">CHARGE</span></h1>
-                    <p class="text-[9px] sketch-font text-blue-500 font-bold uppercase tracking-widest">Sonic AI v1.4.3</p>
+                    <p class="text-[9px] sketch-font text-blue-500 font-bold uppercase tracking-widest">Precision v1.4.4</p>
                 </div>
                 <div class="flex gap-2 border-l border-white/10 pl-4">
                     <div class="theme-dot" style="background:#00d2ff" onclick="setTheme('cyber')"></div>
@@ -158,25 +158,29 @@
                     </svg>
                 </div>
                 <div id="bat-level" class="bat-text z-10">0%</div>
-                <div id="status-tag" class="z-10 bg-blue-500/20 px-4 py-1 rounded-full text-[10px] font-black uppercase mt-4 animate-pulse">Scanning Signal</div>
+                <div id="status-tag" class="z-10 bg-blue-500/20 px-4 py-1 rounded-full text-[10px] font-black uppercase mt-4 animate-pulse tracking-widest">Scanning...</div>
             </div>
 
             <!-- Stats -->
             <div class="md:col-span-7 grid grid-cols-1 gap-5">
                 <div class="grid grid-cols-2 gap-4">
+                    <!-- REALTIME REMAINING TIME -->
+                    <div class="box-container flex items-center gap-3" onclick="openDetail('time')">
+                        <div class="text-4xl">⌛</div>
+                        <div>
+                            <p class="text-[10px] opacity-40 font-bold uppercase" id="lbl-rem-title">Remaining</p>
+                            <p id="bat-time" class="text-xl font-black" style="color:var(--accent)">00m 00s</p>
+                        </div>
+                    </div>
                     <div class="box-container flex items-center gap-3" onclick="openDetail('thermal')">
                         <div class="text-4xl">🌡️</div>
                         <div><p class="text-[10px] opacity-40 font-bold uppercase">Thermal</p><p class="text-xl font-black">27.5°C</p></div>
-                    </div>
-                    <div class="box-container flex items-center gap-3" onclick="openDetail('safety')">
-                        <div class="text-4xl">🛡️</div>
-                        <div><p class="text-[10px] opacity-40 font-bold uppercase">Safety</p><p id="safety-label" class="text-xl font-black">Active</p></div>
                     </div>
                 </div>
 
                 <!-- Live Graph -->
                 <div class="box-container h-56" onclick="openDetail('graph')">
-                    <p class="sketch-font text-xs uppercase opacity-40 mb-3 animate-sketch">Neural Power Pulse</p>
+                    <p class="sketch-font text-xs uppercase opacity-40 mb-3 animate-sketch">Power Pulse Diagnostic</p>
                     <canvas id="chart"></canvas>
                 </div>
             </div>
@@ -185,11 +189,11 @@
         <!-- Footer -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="box-container border-l-8" style="border-left-color:var(--accent)" onclick="openDetail('tip')">
-                <p class="calligraphy text-2xl opacity-80" id="tip-text">AI Protection is monitoring your lithium cells in real-time.</p>
+                <p class="calligraphy text-2xl opacity-80" id="tip-text">Precise time-to-full calculation active. Monitoring current wattage.</p>
             </div>
             <div class="box-container flex items-center justify-between px-6">
                 <button onclick="toggleLang()" class="sketch-font font-black uppercase text-xs">Lang: <span id="lang-label" style="color:var(--accent)">EN</span></button>
-                <button onclick="simulateFull()" class="text-[9px] opacity-20 border px-2 py-1 rounded uppercase hover:opacity-100 transition">Test 100%</button>
+                <div class="text-[9px] opacity-30 font-bold uppercase">FiRCHARGE Precision © 2025</div>
             </div>
         </div>
 
@@ -205,38 +209,40 @@
         const translations = {
             en: {
                 lock: "Initialize Power Link",
-                battery_title: "Core Status",
-                battery_desc: "Energy flow is stabilized. AI is balancing the ionic intake to prevent overcharge.",
+                battery_title: "Core Intel",
+                battery_desc: "The lithium core is absorbing current. Energy density is being monitored for stability.",
+                time_title: "Precision Timer",
+                time_desc: "Calculated based on real-time mA intake. Accuracy improves as charging stabilizes.",
                 thermal_title: "Thermal Mapping",
-                thermal_desc: "Temperature is within optimal parameters. No heat-related degradation detected.",
-                safety_title: "Neural Safety",
-                safety_desc: "Auto-Stop Protocol is active. Charging will halt automatically at 100%.",
-                graph_title: "Diagnostic Pulse",
-                graph_desc: "Real-time stability of current. Peaks represent fast-charge intake.",
-                tip_title: "Longevity Tip",
-                tip_desc: "Modern batteries live longer between 20-80%. Use this range for maximum cell life.",
+                thermal_desc: "Sensors indicate optimal heat dissipation. No risk to cell longevity.",
+                graph_title: "Power Pulse",
+                graph_desc: "Real-time stability of current. Peaks represent fast-charge bursts.",
+                tip_title: "Expert Tip",
+                tip_desc: "For the longest lifespan, unplug your device once it reaches 100%. Neural protection is active.",
                 voice_full: "Battery 100% full. Neural protection activated. Charging halted.",
                 voice_stop: "Charging stopped. System secured.",
                 voice_start: "Power linked. Energy flow initiated.",
                 full_tag: "Protected", charging_tag: "Flowing", disc_tag: "Disconnected",
+                rem_title: "Remaining", wait: "Calculating...", full: "100% Ready",
                 lang: "EN"
             },
             ms: {
                 lock: "Mulakan Isyarat Kuasa",
-                battery_title: "Status Teras",
-                battery_desc: "Aliran tenaga stabil. AI sedang mengimbangi pengambilan ion untuk mengelakkan lebihan cas.",
+                battery_title: "Intel Teras",
+                battery_desc: "Teras lithium sedang menyerap arus. Ketumpatan tenaga dipantau untuk kestabilan.",
+                time_title: "Pemasa Tepat",
+                time_desc: "Dikira berdasarkan pengambilan mA masa nyata. Ketepatan meningkat apabila pengecasan stabil.",
                 thermal_title: "Pemetaan Terma",
-                thermal_desc: "Suhu berada dalam parameter optimum. Tiada kemerosotan haba dikesan.",
-                safety_title: "Keselamatan Neural",
-                safety_desc: "Protokol Auto-Henti aktif. Pengecasan akan terhenti secara automatik pada 100%.",
-                graph_title: "Diagnostik Nadi",
-                graph_desc: "Kestabilan tenaga masa nyata. Puncak menunjukkan pengambilan cas pantas.",
-                tip_title: "Tips Hayat",
-                tip_desc: "Bateri moden hidup lebih lama antara 20-80%. Gunakan julat ini untuk hayat sel maksimum.",
+                thermal_desc: "Sensor menunjukkan pelesapan haba optimum. Tiada risiko kepada jangka hayat sel.",
+                graph_title: "Nadi Kuasa",
+                graph_desc: "Kestabilan tenaga masa nyata. Puncak menunjukkan letusan cas pantas.",
+                tip_title: "Tips Pakar",
+                tip_desc: "Untuk jangka hayat terlama, cabut peranti anda setelah mencapai 100%. Perlindungan neural aktif.",
                 voice_full: "Bateri seratus peratus penuh. Perlindungan neural diaktifkan. Pengecasan dihentikan.",
                 voice_stop: "Pengecasan dihentikan. Sistem selamat.",
                 voice_start: "Kuasa disambung. Aliran tenaga bermula.",
                 full_tag: "Dilindungi", charging_tag: "Mengalir", disc_tag: "Terputus",
+                rem_title: "Baki Masa", wait: "Menghitung...", full: "100% Sedia",
                 lang: "BM"
             }
         };
@@ -255,7 +261,7 @@
         function openDetail(key) {
             const overlay = document.getElementById('detail-overlay');
             const t = translations[currentLang];
-            const icons = { battery: '🔋', thermal: '🌡️', safety: '🛡️', graph: '📊', tip: '💡' };
+            const icons = { battery: '🔋', time: '⌛', thermal: '🌡️', graph: '📊', tip: '💡' };
             document.getElementById('modal-icon').innerText = icons[key] || '🔍';
             document.getElementById('modal-title').innerText = t[key + '_title'];
             document.getElementById('modal-desc').innerText = t[key + '_desc'];
@@ -263,31 +269,6 @@
         }
 
         function closeDetail() { document.getElementById('detail-overlay').classList.remove('modal-active'); }
-
-        function simulateFull() { 
-            lastLevel = 99; 
-            handleAutoStop(); 
-            document.getElementById('bat-level').innerText = "100%";
-            document.getElementById('fluid-fill').style.height = "100%";
-        }
-
-        function handleAutoStop() {
-            if(isAutoStopped) return;
-            isAutoStopped = true;
-            
-            // UI Logic
-            const t = translations[currentLang];
-            document.getElementById('status-tag').innerText = t.full_tag;
-            document.getElementById('status-tag').style.background = "#ef4444";
-            document.getElementById('status-tag').classList.remove('animate-pulse');
-            document.getElementById('main-card').classList.add('is-protected');
-            document.getElementById('charge-bolt').classList.remove('charging-active');
-            document.getElementById('charge-bolt').style.fill = "#ef4444";
-            document.getElementById('safety-label').innerText = "STOPPED";
-            document.getElementById('safety-label').style.color = "#ef4444";
-            
-            speak(t.voice_full);
-        }
 
         async function initBattery() {
             try {
@@ -305,17 +286,32 @@
                     liquid.setAttribute('height', (level * 0.7));
                     liquid.setAttribute('y', 90 - (level * 0.7));
 
-                    // Voice Notification for Connection/Disconnection
-                    if(charging && !lastChargingState) {
-                        speak(t.voice_start);
-                    } else if(!charging && lastChargingState) {
-                        speak(t.voice_stop);
+                    // --- REALTIME TIME TO FULL CALCULATION ---
+                    if (charging && battery.chargingTime !== Infinity) {
+                        const totalSeconds = battery.chargingTime;
+                        const mins = Math.floor(totalSeconds / 60);
+                        const secs = Math.floor(totalSeconds % 60);
+                        document.getElementById('bat-time').innerText = `${mins}m ${secs}s`;
+                    } else if (level >= 100) {
+                        document.getElementById('bat-time').innerText = t.full;
+                    } else {
+                        document.getElementById('bat-time').innerText = t.wait;
                     }
+
+                    // Voice Notification
+                    if(charging && !lastChargingState) speak(t.voice_start);
+                    else if(!charging && lastChargingState) speak(t.voice_stop);
                     lastChargingState = charging;
 
-                    // Auto-Stop Check
+                    // Status UI
                     if(level >= 100 && charging) {
-                        handleAutoStop();
+                        if(!isAutoStopped) {
+                            isAutoStopped = true;
+                            speak(t.voice_full);
+                        }
+                        document.getElementById('status-tag').innerText = t.full_tag;
+                        document.getElementById('status-tag').style.background = "#ef4444";
+                        document.getElementById('main-card').classList.add('is-protected');
                     } else if (!charging) {
                         isAutoStopped = false;
                         document.getElementById('status-tag').innerText = t.disc_tag;
@@ -327,15 +323,14 @@
                         document.getElementById('status-tag').style.background = "rgba(59,130,246,0.2)";
                         document.getElementById('main-card').classList.remove('is-protected');
                         document.getElementById('charge-bolt').classList.add('charging-active');
-                        document.getElementById('charge-bolt').style.fill = "#fff";
-                        document.getElementById('safety-label').innerText = "ACTIVE";
-                        document.getElementById('safety-label').style.color = "var(--accent)";
                     }
 
                     if(chart) { chart.data.datasets[0].data.push(level); chart.data.datasets[0].data.shift(); chart.update(); }
                 };
+                
                 battery.onchargingchange = update;
                 battery.onlevelchange = update;
+                battery.onchargingtimechange = update;
                 update();
             } catch (e) { document.getElementById('usb-lock').classList.add('lock-off'); }
         }
@@ -348,8 +343,11 @@
 
         function toggleLang() {
             currentLang = currentLang === 'en' ? 'ms' : 'en';
-            document.getElementById('lang-label').innerText = translations[currentLang].lang;
-            document.getElementById('lock-title').innerText = translations[currentLang].lock;
+            const t = translations[currentLang];
+            document.getElementById('lang-label').innerText = t.lang;
+            document.getElementById('lock-title').innerText = t.lock;
+            document.getElementById('lbl-rem-title').innerText = t.rem_title;
+            document.getElementById('tip-text').innerText = t.tip_desc;
         }
 
         function updateClock() {
@@ -368,7 +366,6 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } }, plugins: { legend: { display: false } } }
             });
             setTheme('cyber');
-            updateClock();
         };
     </script>
 </body>
