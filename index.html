@@ -2,423 +2,231 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FiRCHARGE Sonic | 3D Live Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>FiRCHARGE Pro | Sonic 1.2.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@700&family=Outfit:wght@400;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg-dark: #02050a; --neon: #00d2ff; --energy: #39ff14; --plasma: #60a5fa; }
-        body { font-family: 'Outfit', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        .sketch-font { font-family: 'Architects Daughter', cursive; }
-        .calligraphy { font-family: 'Caveat', cursive; }
+        :root { --bg-dark: #02050a; --neon: #00d2ff; --energy: #39ff14; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg-dark); color: #f1f5f9; margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh; }
 
-        .dark-mode { background-color: var(--bg-dark); color: #f1f5f9; }
-        .light-mode { background-color: #f8fafc; color: #0f172a; }
+        .box-container {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 1.5rem; padding: 1rem; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center;
+        }
 
-        /* Lock HUD */
+        .bat-text { font-size: clamp(4rem, 15vw, 8rem); font-weight: 900; letter-spacing: -4px; line-height: 1; z-index: 10; }
+        .clock-text { font-size: clamp(1.5rem, 5vw, 2.5rem); font-weight: 900; color: var(--neon); }
+
+        .pixar-3d {
+            width: clamp(50px, 12vw, 100px); height: auto;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+            animation: float 3s infinite ease-in-out; z-index: 10;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .energy-wave {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(0deg, rgba(0, 210, 255, 0.3) 0%, transparent 100%);
+            transition: height 1.5s ease-in-out; z-index: 0;
+        }
+
         #usb-lock {
             position: fixed; inset: 0; z-index: 9999;
             background: radial-gradient(circle at center, #0a1122 0%, #000 100%);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.6s ease-in-out;
+            text-align: center; padding: 20px; transition: opacity 0.5s;
         }
-        .lock-off { opacity: 0; visibility: hidden; transform: translateY(-100%); pointer-events: none; }
+        .lock-off { opacity: 0; visibility: hidden; pointer-events: none; }
 
-        /* 3D Pixar Animation Elements */
-        .plasma-orb {
-            width: 120px; height: 120px;
-            background: radial-gradient(circle at 30% 30%, var(--plasma), #1e40af);
-            border-radius: 50%;
-            position: absolute;
-            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.5), 0 0 40px var(--neon);
-            display: none; z-index: 5;
-            animation: float-orb 3s infinite ease-in-out;
-        }
-
-        @keyframes float-orb {
-            0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); filter: brightness(1); }
-            50% { transform: translate(-50%, -60%) scale(1.1) rotate(180deg); filter: brightness(1.3); }
-        }
-
-        .charging-ring {
-            position: absolute; width: 160px; height: 160px;
-            border: 4px dashed var(--neon);
-            border-radius: 50%; opacity: 0.3;
-            animation: rotate-ring 10s linear infinite;
-            display: none;
-        }
-
-        @keyframes rotate-ring { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-
-        .is-charging .plasma-orb, .is-charging .charging-ring { display: block; left: 50%; top: 50%; }
-
-        /* Box Blueprint */
-        .box-container {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 1.5rem; padding: 1.25rem;
-            position: relative; overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-        }
-        .box-container:hover { transform: translateY(-5px); border-color: var(--neon); }
-
-        /* Energy Liquid */
-        .energy-wave {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: linear-gradient(0deg, rgba(0, 210, 255, 0.25) 0%, transparent 100%);
-            transition: height 1.5s ease-in-out;
-            z-index: 0;
-        }
-
-        .pixar-3d { display: inline-block; filter: drop-shadow(0 8px 6px rgba(0,0,0,0.3)); animation: bounce 3s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-
-        #detail-modal {
-            position: fixed; inset: 0; z-index: 10000;
-            background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(20px); padding: 2rem;
-        }
-
-        .time-text { font-size: 2.5rem; font-weight: 900; letter-spacing: -2px; color: var(--neon); }
+        .sketch-font { font-family: 'Architects Daughter', cursive; }
+        .calligraphy { font-family: 'Caveat', cursive; }
     </style>
 </head>
-<body class="dark-mode" onclick="initAudio()">
+<body onclick="initAudio()">
 
-    <!-- USB LOCK HUD -->
+    <!-- USB HARDWARE LOCK -->
     <div id="usb-lock">
-        <div class="pixar-3d text-7xl mb-4">🛸</div>
-        <h1 class="text-3xl sketch-font text-white" id="lock-msg">Awaiting Power Link...</h1>
-        <p class="calligraphy text-xl text-blue-400 mt-2">v1.2.2 Sonic Engine</p>
-        <p class="text-[10px] uppercase tracking-widest mt-10 opacity-30">Tap screen to activate audio</p>
+        <img src="file:///android_res/drawable/icon_lock_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3106/3106842.png'" class="pixar-3d mb-4">
+        <h1 class="text-2xl sketch-font text-white">Sila Sambung USB</h1>
+        <p class="calligraphy text-blue-400 text-lg">FiRCHARGE Sonic v1.2.5</p>
     </div>
 
-    <!-- DETAIL MODAL -->
-    <div id="detail-modal" onclick="closeModal()">
-        <div class="box-container max-w-lg w-full bg-slate-900 border-neon p-8" onclick="event.stopPropagation()">
-            <h2 id="modal-title" class="sketch-font text-3xl text-blue-400 mb-4">Neural Data</h2>
-            <p id="modal-desc" class="calligraphy text-2xl opacity-90 leading-relaxed"></p>
-            <button onclick="closeModal()" class="mt-8 w-full py-3 bg-blue-600 rounded-xl font-bold uppercase text-xs">Close Interface</button>
-        </div>
-    </div>
-
-    <main class="max-w-5xl mx-auto p-4 md:p-10">
+    <!-- MAIN DASHBOARD -->
+    <main class="w-full max-w-4xl mx-auto p-4 md:p-8 space-y-4">
         
-        <header class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
-            <div class="text-center md:text-left">
-                <h1 class="text-3xl font-black tracking-tighter">FiR<span class="text-blue-500">CHARGE</span></h1>
-                <p class="text-[10px] sketch-font text-blue-400 opacity-60 tracking-[0.3em]">SONIC STUDIO 1.2.2</p>
-            </div>
-            
-            <!-- Realtime Clock Widget -->
-            <div class="box-container py-2 px-6 flex items-center gap-4 border-blue-500/30" onclick="showDetail('clock')">
-                <div class="text-right">
-                    <div id="live-time" class="time-text">00:00:00</div>
-                    <div id="live-ampm" class="text-xs font-bold uppercase opacity-60">--</div>
-                </div>
-                <div class="h-10 w-[1px] bg-white/10"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <header class="flex justify-between items-center box-container">
                 <div>
-                    <div id="live-day" class="sketch-font text-sm text-blue-400">Day</div>
-                    <div id="live-date" class="text-[10px] uppercase opacity-50">00 Jan 2025</div>
+                    <h1 class="text-xl font-black">FiR<span class="text-blue-500">CHARGE</span></h1>
+                    <p class="text-[9px] sketch-font text-blue-400 tracking-widest uppercase">Sonic Engine 1.2.5</p>
                 </div>
-            </div>
+                <button onclick="toggleLang()" class="px-4 py-2 border border-white/10 rounded-xl text-xs font-bold bg-white/5 uppercase">BM/EN</button>
+            </header>
 
-            <div class="flex gap-2">
-                <button onclick="toggleLang()" class="box-container py-1 px-4 text-xs font-bold sketch-font uppercase">
-                    <span id="lang-btn">BM</span>
-                </button>
-                <button onclick="toggleTheme()" class="box-container py-1 px-3 text-xl">
-                    <span id="theme-icon">🌞</span>
-                </button>
-            </div>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-            
-            <!-- Battery Center with 3D Plasma -->
-            <div class="box-container md:col-span-5 min-h-[420px] flex flex-col items-center justify-center relative" id="battery-box" onclick="showDetail('battery')">
-                <div class="energy-wave" id="fluid"></div>
-                <div class="charging-ring"></div>
-                <div class="plasma-orb"></div>
-                
-                <div class="relative z-10 text-center">
-                    <div class="flex gap-2 justify-center mb-4">
-                        <span class="pixar-3d text-3xl">⚡</span>
-                        <span class="pixar-3d text-3xl" style="animation-delay: 0.5s">🍭</span>
-                    </div>
-                    <p class="sketch-font text-sm opacity-50 uppercase tracking-widest" id="lbl-status">Linking...</p>
-                    <div class="text-8xl font-black leading-none my-2 tracking-tighter" id="bat-level">0%</div>
-                    <div class="calligraphy text-3xl text-green-400" id="bat-health">System: Healthy</div>
+            <div class="box-container flex-row items-center justify-between px-6">
+                <div>
+                    <div id="live-time" class="clock-text">00:00:00</div>
+                    <div id="live-ampm" class="text-xs font-bold opacity-60">AM</div>
                 </div>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="md:col-span-7 grid grid-cols-2 gap-5">
-                <div class="box-container" onclick="showDetail('temp')">
-                    <div class="flex items-center gap-4">
-                        <span class="text-5xl pixar-3d">🧊</span>
-                        <div>
-                            <p class="sketch-font text-[10px] opacity-40 uppercase" id="lbl-temp">Thermal</p>
-                            <p class="text-2xl font-black">27.1°C</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="box-container" onclick="showDetail('time')">
-                    <div class="flex items-center gap-4">
-                        <span class="text-5xl pixar-3d">⏳</span>
-                        <div>
-                            <p class="sketch-font text-[10px] opacity-40 uppercase" id="lbl-rem">To 100%</p>
-                            <p class="text-2xl font-black" id="bat-time">--</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Live Graph -->
-                <div class="box-container col-span-2 py-6" onclick="showDetail('chart')">
-                    <h3 class="sketch-font text-xs opacity-40 uppercase mb-4 tracking-widest" id="lbl-curve">Energy Flow Blueprint</h3>
-                    <div class="h-40 w-full">
-                        <canvas id="chart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- AI Tips -->
-            <div class="md:col-span-12 grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="box-container border-l-4 border-blue-500" onclick="showDetail('tip1')">
-                    <h4 class="sketch-font text-md font-bold text-blue-500 mb-1" id="tip1-t">Smart Protocol</h4>
-                    <p class="calligraphy text-xl opacity-70" id="tip1-d">Avoid 100% full cycles to save cell health.</p>
-                </div>
-                <div class="box-container border-l-4 border-orange-500" onclick="showDetail('tip2')">
-                    <h4 class="sketch-font text-md font-bold text-orange-400 mb-1" id="tip2-t">Thermal Guard</h4>
-                    <p class="calligraphy text-xl opacity-70" id="tip2-d">Fast charge heat slows down ionic flow.</p>
+                <div class="text-right">
+                    <p id="live-day" class="sketch-font text-blue-400">Day</p>
+                    <p id="live-date" class="text-[10px] opacity-40">00 Jan 2025</p>
                 </div>
             </div>
         </div>
 
-        <footer class="mt-12 text-center opacity-30 sketch-font text-[9px] tracking-[0.4em] uppercase">
-            FiRCHARGE Neural Studio &copy; 2025 | v1.2.2-Sonic
-        </footer>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="box-container md:col-span-5 min-h-[320px] items-center">
+                <div class="energy-wave" id="fluid"></div>
+                <img src="file:///android_res/drawable/icon_battery_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3103/3103446.png'" class="pixar-3d mb-2">
+                <div class="bat-text" id="bat-level">0%</div>
+                <p id="bat-time" class="z-10 text-blue-300 font-bold mt-2 text-sm">Menghitung...</p>
+            </div>
+
+            <div class="md:col-span-7 grid grid-cols-2 gap-4">
+                <div class="box-container flex-row items-center gap-3">
+                    <img src="file:///android_res/drawable/icon_temp_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2103/2103611.png'" class="w-10 h-10">
+                    <div><p class="text-[9px] opacity-50 uppercase">Temp</p><p class="text-lg font-black">30.2°C</p></div>
+                </div>
+                <div class="box-container flex-row items-center gap-3">
+                    <img src="file:///android_res/drawable/icon_health_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4228/4228705.png'" class="w-10 h-10">
+                    <div><p class="text-[9px] opacity-50 uppercase">Health</p><p class="text-lg font-black">Good</p></div>
+                </div>
+                <div class="box-container col-span-2 py-4 h-40">
+                    <canvas id="chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="box-container border-l-4 border-blue-500">
+                <h4 class="sketch-font text-blue-500 font-bold text-sm">Smart Protocol</h4>
+                <p class="calligraphy text-lg opacity-70" id="tip1">Elakkan cas 100% setiap hari untuk jaga sel.</p>
+            </div>
+            <div class="box-container border-l-4 border-orange-500">
+                <h4 class="sketch-font text-orange-500 font-bold text-sm">Thermal Guard</h4>
+                <p class="calligraphy text-lg opacity-70" id="tip2">Suhu tinggi musuh utama jangka hayat bateri.</p>
+            </div>
+        </div>
     </main>
 
     <script>
-        let isDarkMode = true;
         let currentLang = 'en';
         let chart;
-        let chartData = Array(12).fill(0);
-        let audioCtx = null;
-        let isAudioInit = false;
+        let audioCtx;
+        let hasAnnouncedFull = false;
+        let lastChargingStatus = false;
 
-        const text = {
-            en: {
-                lock: "Awaiting Power Link...",
-                status: "Energy Stream Active",
-                health: "System: Optimized",
-                temp: "Thermal",
-                rem: "To 100%",
-                curve: "Power Graph Blueprint",
-                tip1t: "Smart Protocol",
-                tip1d: "Avoid 100% full cycles to save cell health.",
-                tip2t: "Thermal Guard",
-                tip2d: "Fast charge heat slows down ionic flow.",
-                full: "100% Charged",
-                days: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-                months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
-                details: {
-                    clock: "System clock is synced with atomic time. Precise measurement of charging sessions.",
-                    battery: "Ionic absorption is active. Optimal range is 20% to 80% for long-term health.",
-                    temp: "Battery chemistry is stable. Keep device under 35°C for maximum lifespan.",
-                    time: "Estimation based on current wattage intake to reach full capacity.",
-                    chart: "Visual log of electrical current stability over the last 60 seconds.",
-                    tip1: "Modern batteries degrade faster when held at 100% voltage for too long.",
-                    tip2: "Charging while gaming creates double-heat, damaging the battery chemistry."
-                }
-            },
-            ms: {
-                lock: "Menunggu Sambungan...",
-                status: "Aliran Tenaga Aktif",
-                health: "Sistem: Dioptimumkan",
-                temp: "Suhu Terma",
-                rem: "Hingga 100%",
-                curve: "Blueprint Graf Kuasa",
-                tip1t: "Protokol Pintar",
-                tip1d: "Elakkan kitaran penuh 100% untuk jaga sel.",
-                tip2t: "Perisai Terma",
-                tip2d: "Haba cas pantas melambatkan aliran ion.",
-                full: "100% Sedia",
-                days: ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"],
-                months: ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"],
-                details: {
-                    clock: "Jam sistem diselaraskan dengan masa atom. Ukuran tepat sesi pengecasan.",
-                    battery: "Penyerapan ion sedang aktif. Julat optimum ialah 20% ke 80% untuk kesihatan jangka panjang.",
-                    temp: "Kimia bateri stabil. Pastikan peranti bawah 35°C untuk jangka hayat maksimum.",
-                    time: "Anggaran berdasarkan pengambilan watt semasa untuk mencapai kapasiti penuh.",
-                    chart: "Log visual 60 saat terakhir kestabilan arus elektrik.",
-                    tip1: "Bateri moden merosot lebih cepat jika dibiarkan pada voltan 100% terlalu lama.",
-                    tip2: "Mengecas sambil bermain game menghasilkan haba berganda, musuh utama kimia bateri."
-                }
-            }
+        const langData = {
+            en: { days: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], wait: "Calculating...", full: "100% Charged", tip1: "Avoid 100% daily to prolong battery life.", tip2: "Heat is the #1 enemy of battery longevity." },
+            ms: { days: ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"], months: ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"], wait: "Menghitung...", full: "100% Penuh", tip1: "Elakkan cas 100% setiap hari untuk jaga sel.", tip2: "Suhu tinggi musuh utama jangka hayat bateri." }
         };
 
-        // --- Sound Engine ---
-        function initAudio() {
-            if (isAudioInit) return;
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            isAudioInit = true;
-            // Test beep
-            playSfx(1000, 0.1, 'sine');
+        function initAudio() { 
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+            if(audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        function playSfx(freq, duration, type) {
-            if (!audioCtx) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            
+        function playSfx(type) {
+            if(!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
-            osc.type = type || 'sine';
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(freq / 2, audioCtx.currentTime + duration);
-            
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-            
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
+
+            const now = audioCtx.currentTime;
+
+            if(type === 'full') {
+                // Futuristic Success Chime (Two notes: C5 to G5)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.3); // G5
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                osc.start(); osc.stop(now + 0.6);
+            } else if(type === 'connect') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(); osc.stop(now + 0.2);
+            }
         }
 
-        // --- Clock Engine ---
         function updateClock() {
             const now = new Date();
-            let h = now.getHours();
-            let m = now.getMinutes();
-            let s = now.getSeconds();
-            let ampm = h >= 12 ? 'PM' : 'AM';
+            let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds(), ampm = h >= 12 ? 'PM' : 'AM';
             h = h % 12 || 12;
-            
-            document.getElementById('live-time').innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            document.getElementById('live-time').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
             document.getElementById('live-ampm').innerText = ampm;
-            
-            const t = text[currentLang];
-            document.getElementById('live-day').innerText = t.days[now.getDay()];
-            document.getElementById('live-date').innerText = `${now.getDate()} ${t.months[now.getMonth()]} ${now.getFullYear()}`;
-        }
-        setInterval(updateClock, 1000);
-
-        // --- Battery & UI Engine ---
-        function showDetail(key) {
-            const modal = document.getElementById('detail-modal');
-            document.getElementById('modal-title').innerText = "DATA: " + key.toUpperCase();
-            document.getElementById('modal-desc').innerText = text[currentLang].details[key];
-            modal.style.display = 'flex';
-            playSfx(600, 0.1);
+            const l = langData[currentLang];
+            document.getElementById('live-day').innerText = l.days[now.getDay()];
+            document.getElementById('live-date').innerText = `${now.getDate()} ${l.months[now.getMonth()]} ${now.getFullYear()}`;
         }
 
-        function closeModal() { document.getElementById('detail-modal').style.display = 'none'; }
+        async function monitor() {
+            const battery = await navigator.getBattery();
+            const updateUI = () => {
+                const charging = battery.charging;
+                const level = Math.round(battery.level * 100);
+
+                // USB Connection Detection Logic
+                document.getElementById('usb-lock').classList.toggle('lock-off', charging);
+                
+                // Play Connect Sound
+                if(charging && !lastChargingStatus) playSfx('connect');
+                lastChargingStatus = charging;
+
+                // FULL CHARGE SOUND LOGIC
+                if (level >= 100 && charging) {
+                    if (!hasAnnouncedFull) {
+                        playSfx('full');
+                        hasAnnouncedFull = true;
+                    }
+                } else if (level < 100) {
+                    hasAnnouncedFull = false; // Reset trigger if battery drops
+                }
+
+                document.getElementById('bat-level').innerText = level + '%';
+                document.getElementById('fluid').style.height = level + '%';
+                
+                if (charging && battery.chargingTime !== Infinity) {
+                    let mins = Math.floor(battery.chargingTime / 60);
+                    document.getElementById('bat-time').innerText = mins + " mins to 100%";
+                } else {
+                    document.getElementById('bat-time').innerText = level >= 100 ? langData[currentLang].full : langData[currentLang].wait;
+                }
+            };
+            battery.onchargingchange = updateUI;
+            battery.onlevelchange = updateUI;
+            updateUI();
+        }
 
         function initChart() {
             const ctx = document.getElementById('chart').getContext('2d');
             chart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: Array(12).fill(''),
-                    datasets: [{
-                        data: chartData,
-                        borderColor: '#00d2ff',
-                        borderWidth: 2,
-                        tension: 0.5,
-                        pointRadius: 0,
-                        fill: true,
-                        backgroundColor: 'rgba(0, 210, 255, 0.05)'
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { display: false, min: 0, max: 100 }, x: { display: false } }
-                }
+                data: { labels: Array(10).fill(''), datasets: [{ data: Array(10).fill(0), borderColor: '#00d2ff', tension: 0.4, fill: true, backgroundColor: 'rgba(0,210,255,0.05)', pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } } }
             });
         }
 
-        async function monitor() {
-            const battery = await navigator.getBattery();
-            let lastCharging = battery.charging;
-
-            const update = () => {
-                const charging = battery.charging;
-                const level = Math.round(battery.level * 100);
-
-                // Sound Effect Triggers
-                if (charging !== lastCharging) {
-                    if (charging) {
-                        playSfx(880, 0.3, 'square'); // Connect sound
-                    } else {
-                        playSfx(440, 0.3, 'sawtooth'); // Disconnect sound
-                    }
-                    lastCharging = charging;
-                }
-
-                const lock = document.getElementById('usb-lock');
-                const box = document.getElementById('battery-box');
-                
-                if (charging) {
-                    lock.classList.add('lock-off');
-                    box.classList.add('is-charging');
-                } else {
-                    lock.classList.remove('lock-off');
-                    box.classList.remove('is-charging');
-                }
-
-                document.getElementById('bat-level').innerText = level + '%';
-                document.getElementById('fluid').style.height = level + '%';
-                document.getElementById('lbl-status').innerText = charging ? text[currentLang].status : "Disconnected";
-
-                if (charging && battery.chargingTime !== Infinity) {
-                    const h = Math.floor(battery.chargingTime / 3600);
-                    const m = Math.floor((battery.chargingTime % 3600) / 60);
-                    document.getElementById('bat-time').innerText = (h > 0 ? h + "h " : "") + m + "m";
-                } else {
-                    document.getElementById('bat-time').innerText = level >= 100 ? text[currentLang].full : "--";
-                }
-
-                chartData.push(level);
-                chartData.shift();
-                chart.update();
-            };
-            
-            update();
-            battery.addEventListener('chargingchange', update);
-            battery.addEventListener('levelchange', update);
+        function toggleLang() { 
+            currentLang = currentLang === 'en' ? 'ms' : 'en'; 
+            updateClock(); 
+            document.getElementById('tip1').innerText = langData[currentLang].tip1;
+            document.getElementById('tip2').innerText = langData[currentLang].tip2;
         }
 
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            document.body.className = isDarkMode ? 'dark-mode' : 'light-mode';
-            document.getElementById('theme-icon').innerText = isDarkMode ? '🌞' : '🌙';
-        }
-
-        function toggleLang() {
-            currentLang = currentLang === 'en' ? 'ms' : 'en';
-            const t = text[currentLang];
-            document.getElementById('lang-btn').innerText = currentLang === 'en' ? 'BM' : 'EN';
-            document.getElementById('lock-msg').innerText = t.lock;
-            document.getElementById('bat-health').innerText = t.health;
-            document.getElementById('lbl-temp').innerText = t.temp;
-            document.getElementById('lbl-rem').innerText = t.rem;
-            document.getElementById('lbl-curve').innerText = t.curve;
-            document.getElementById('tip1-t').innerText = t.tip1t;
-            document.getElementById('tip1-d').innerText = t.tip1d;
-            document.getElementById('tip2-t').innerText = t.tip2t;
-            document.getElementById('tip2-d').innerText = t.tip2d;
-            updateClock();
-        }
-
-        window.onload = () => { initChart(); monitor(); updateClock(); };
+        window.onload = () => { updateClock(); setInterval(updateClock, 1000); monitor(); initChart(); };
     </script>
 </body>
 </html>
