@@ -6,11 +6,11 @@
     
     <!-- 
         FiRCHARGE VERSION TRACKING 
-        WEB: 1.3.9-Stable
-        ANDROID: 1.3.9-v35
+        WEB: 1.4.0-Pro-Sketch
+        ANDROID: 1.4.0-v36
     -->
     
-    <title>FiRCHARGE Pro | v1.3.9 Stable</title>
+    <title>FiRCHARGE Pro | Sketch v1.4.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,13 +20,12 @@
         :root { --accent: #00d2ff; --bg: #030508; --text: #ffffff; }
 
         /* THEME ENGINE */
-        [data-theme="cyber"] { --accent: #00d2ff; --glow: rgba(0, 210, 255, 0.4); }
-        [data-theme="solar"] { --accent: #ff9d00; --glow: rgba(255, 157, 0, 0.4); }
-        [data-theme="bio"] { --accent: #32ff7e; --glow: rgba(50, 255, 126, 0.4); }
-        [data-theme="royal"] { --accent: #bd00ff; --glow: rgba(189, 0, 255, 0.4); }
-        [data-theme="stealth"] { --accent: #ffffff; --glow: rgba(255, 255, 255, 0.2); }
+        [data-theme="cyber"] { --accent: #00d2ff; }
+        [data-theme="solar"] { --accent: #ff9d00; }
+        [data-theme="bio"] { --accent: #32ff7e; }
+        [data-theme="royal"] { --accent: #bd00ff; }
 
-        [data-mode="white"] { --bg: #f1f5f9; --text: #0f172a; --card: rgba(255,255,255,0.8); --border: rgba(0,0,0,0.05); }
+        [data-mode="white"] { --bg: #f8fafc; --text: #0f172a; --card: rgba(255,255,255,0.9); --border: rgba(0,0,0,0.08); }
         [data-mode="dark"] { --bg: #030508; --text: #ffffff; --card: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
 
         body { 
@@ -35,40 +34,44 @@
             overflow-x: hidden;
         }
 
+        /* --- REVEAL & HANDWRITING ANIMATIONS --- */
+        @keyframes reveal-sketch {
+            from { clip-path: inset(0 100% 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+        }
+        .animate-sketch {
+            display: inline-block;
+            animation: reveal-sketch 2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+
+        @keyframes entrance {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal-card { opacity: 0; animation: entrance 0.8s ease-out forwards; }
+
+        /* Boxes */
         .box-container {
             border: 1px solid var(--border);
             background: var(--card);
             backdrop-filter: blur(25px);
-            border-radius: 30px;
-            padding: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        /* 3D Pixar Style Icons */
+        /* Pixar 3D Icons */
         .pixar-3d {
-            filter: drop-shadow(0 15px 12px rgba(0,0,0,0.3));
+            filter: drop-shadow(0 15px 12px rgba(0,0,0,0.25));
             transition: 0.4s ease;
         }
 
-        /* --- REAL CHARGING ANIMATIONS --- */
-        @keyframes scanline {
-            0% { transform: translateY(100%); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(-100%); opacity: 0; }
+        /* Liquid Wave Animation */
+        .energy-fill {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(0deg, var(--accent) 0%, transparent 100%);
+            opacity: 0.2; transition: height 1.5s ease-in-out;
         }
-        .charging-scan {
-            position: absolute; width: 100%; height: 20px;
-            background: linear-gradient(to top, transparent, var(--accent), transparent);
-            display: none; z-index: 15;
-        }
-        .is-charging .charging-scan { display: block; animation: scanline 2s infinite linear; }
-
-        @keyframes energy-pulse {
-            0% { filter: drop-shadow(0 0 5px var(--accent)); }
-            50% { filter: drop-shadow(0 0 25px var(--accent)); }
-            100% { filter: drop-shadow(0 0 5px var(--accent)); }
-        }
-        .is-charging .pixar-3d-main { animation: energy-pulse 2s infinite ease-in-out; }
 
         /* Lock Screen */
         #usb-lock {
@@ -79,83 +82,80 @@
         }
         .lock-off { transform: translateY(-100%); pointer-events: none; }
 
-        .bat-text { font-size: clamp(4rem, 15vw, 7.5rem); font-weight: 900; letter-spacing: -5px; line-height: 1; }
-        
-        #fluid-fill {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: linear-gradient(0deg, var(--accent) 0%, transparent 100%);
-            opacity: 0.2; transition: height 1.5s ease;
-        }
-
-        .theme-dot { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; transition: 0.3s; }
-        .theme-dot:hover { transform: scale(1.2) rotate(15deg); }
-
+        /* Typography */
         .sketch-font { font-family: 'Architects Daughter', cursive; }
         .calligraphy { font-family: 'Caveat', cursive; }
+        .bat-text { font-size: clamp(4rem, 12vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 1; }
+
+        .theme-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; transition: 0.3s; }
+        
+        /* Grid Fix for small phones */
+        @media (max-width: 400px) {
+            .box-container { padding: 15px; border-radius: 20px; }
+            .bat-text { font-size: 3.5rem; }
+        }
     </style>
 </head>
 <body onclick="initAudio()">
 
     <!-- USB HARDWARE LOCK -->
     <div id="usb-lock">
-        <div class="pixar-3d w-32 h-32 mb-8">
+        <div class="pixar-3d w-28 h-28 mb-6">
             <svg viewBox="0 0 100 100">
                 <rect x="30" y="30" width="40" height="45" rx="12" fill="var(--accent)" />
                 <rect x="42" y="15" width="6" height="15" rx="2" fill="#fff" />
                 <rect x="54" y="15" width="6" height="15" rx="2" fill="#fff" />
-                <circle cx="50" cy="52" r="8" fill="rgba(255,255,255,0.4)" class="animate-ping" />
+                <circle cx="50" cy="52" r="6" fill="#fff" class="animate-ping" />
             </svg>
         </div>
-        <h1 class="text-3xl font-black uppercase tracking-tighter" id="lock-title">Awaiting USB Power</h1>
-        <p class="opacity-50 mt-2 font-bold calligraphy text-xl">System Build: 1.3.9-Stable</p>
-        <button onclick="unlockManual()" class="mt-10 opacity-20 text-[10px] uppercase tracking-widest border border-white/20 px-6 py-2 rounded-full">Bypass Bridge</button>
+        <h1 class="text-2xl font-black uppercase sketch-font animate-sketch" id="lock-title">Connect Power Signal</h1>
+        <p class="calligraphy text-xl opacity-60 mt-2">FiRCHARGE Pro Studio 1.4.0</p>
+        <button onclick="unlockManual()" class="mt-8 opacity-20 text-[10px] uppercase tracking-widest border border-white/20 px-4 py-1 rounded-full">Manual Bypass</button>
     </div>
 
     <!-- MAIN DASHBOARD -->
-    <main class="max-w-5xl mx-auto p-4 md:p-10 space-y-6">
+    <main class="max-w-5xl mx-auto p-4 md:p-10 space-y-5">
         
         <!-- Header Section -->
         <header class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="box-container flex flex-row items-center gap-4 w-full md:w-auto">
+            <div class="box-container flex flex-row items-center gap-4 w-full md:w-auto reveal-card" style="animation-delay: 0.1s;">
                 <div>
-                    <h1 class="text-2xl font-black">FiR<span style="color:var(--accent)">CHARGE</span></h1>
-                    <p class="text-[10px] sketch-font tracking-widest uppercase text-blue-500 font-bold">WEB v1.3.9</p>
+                    <h1 class="text-2xl font-black tracking-tight">FiR<span style="color:var(--accent)">CHARGE</span></h1>
+                    <p class="text-[9px] sketch-font tracking-widest uppercase opacity-60 text-blue-500 font-bold">PRO SKETCH v1.4.0</p>
                 </div>
                 <div class="flex gap-2 border-l border-white/10 pl-4">
                     <div class="theme-dot" style="background:#00d2ff" onclick="setTheme('cyber')"></div>
                     <div class="theme-dot" style="background:#ff9d00" onclick="setTheme('solar')"></div>
                     <div class="theme-dot" style="background:#32ff7e" onclick="setTheme('bio')"></div>
                     <div class="theme-dot" style="background:#bd00ff" onclick="setTheme('royal')"></div>
-                    <div class="theme-dot" style="background:#ffffff" onclick="setTheme('stealth')"></div>
                 </div>
             </div>
 
-            <div class="box-container flex flex-row justify-between items-center gap-8 w-full md:w-auto">
+            <div class="box-container flex flex-row justify-between items-center gap-6 w-full md:w-auto reveal-card" style="animation-delay: 0.2s;">
                 <div class="text-right">
-                    <div id="clock" class="text-3xl font-black tracking-tight" style="color:var(--accent)">00:00:00</div>
+                    <div id="clock" class="text-3xl font-black tracking-tighter" style="color:var(--accent)">00:00:00</div>
                     <div id="date" class="text-[10px] opacity-40 font-bold uppercase tracking-widest">---</div>
                 </div>
-                <button onclick="toggleMode()" class="p-3 bg-white/5 rounded-2xl text-2xl border border-white/10 shadow-lg" id="mode-btn">🌞</button>
+                <button onclick="toggleMode()" class="p-3 bg-white/5 rounded-2xl text-2xl border border-white/10" id="mode-btn">🌞</button>
             </div>
         </header>
 
         <!-- Main Content -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
             
             <!-- Battery Centerpiece -->
-            <div class="box-container md:col-span-5 flex flex-col items-center justify-center min-h-[440px] relative" id="main-battery-card">
-                <div id="fluid-fill"></div>
+            <div class="box-container md:col-span-5 flex flex-col items-center justify-center min-h-[400px] relative reveal-card" style="animation-delay: 0.3s;">
+                <div class="energy-fill" id="fluid-fill"></div>
                 
-                <div class="pixar-3d pixar-3d-main w-48 h-48 mb-4 z-10 relative overflow-hidden">
-                    <div class="charging-scan"></div>
+                <div class="pixar-3d w-40 h-40 mb-4 z-10 relative">
                     <svg viewBox="0 0 100 100" class="w-full h-full">
                         <defs>
                             <linearGradient id="energyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                                 <stop offset="0%" style="stop-color:var(--accent)" />
-                                <stop offset="100%" style="stop-color:transparent; stop-opacity:0" />
+                                <stop offset="100%" style="stop-color:transparent" />
                             </linearGradient>
                         </defs>
-                        <rect x="25" y="15" width="50" height="75" rx="15" fill="rgba(128,128,128,0.1)" stroke="var(--accent)" stroke-width="3"/>
+                        <rect x="25" y="15" width="50" height="75" rx="15" fill="rgba(128,128,128,0.05)" stroke="var(--accent)" stroke-width="3"/>
                         <rect x="40" y="8" width="20" height="7" rx="3" fill="var(--accent)" />
                         <!-- Liquid Content -->
                         <rect id="svg-liquid" x="28" y="50" width="44" height="38" rx="10" fill="url(#energyGrad)" />
@@ -164,15 +164,15 @@
                 </div>
 
                 <div id="bat-level" class="bat-text z-10">0%</div>
-                <div id="bat-status" class="z-10 font-black uppercase mt-4 tracking-widest text-sm" style="color:var(--accent)">Initializing...</div>
-                <p id="rem-time" class="z-10 text-[10px] opacity-50 mt-1 uppercase font-bold tracking-widest">Est: --</p>
+                <div id="bat-status" class="z-10 sketch-font text-lg font-bold uppercase mt-2 animate-sketch" style="color:var(--accent)">Scanning...</div>
+                <p id="rem-time" class="z-10 calligraphy text-xl opacity-60">Est: --</p>
             </div>
 
-            <!-- Side Intelligence -->
-            <div class="md:col-span-7 grid grid-cols-1 gap-6">
+            <!-- Side Stats -->
+            <div class="md:col-span-7 grid grid-cols-1 gap-5">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="box-container flex items-center gap-4">
-                        <div class="pixar-3d w-14 h-14">
+                    <div class="box-container flex items-center gap-3 reveal-card" style="animation-delay: 0.4s;">
+                        <div class="pixar-3d w-12 h-12">
                             <svg viewBox="0 0 100 100">
                                 <circle cx="50" cy="75" r="18" fill="#ff4757" />
                                 <rect x="42" y="15" width="16" height="50" rx="8" fill="#ff4757" />
@@ -180,12 +180,12 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-[10px] opacity-40 font-bold uppercase" id="lbl-temp">Thermal</p>
-                            <p class="text-2xl font-black">27.9°C</p>
+                            <p class="text-[10px] opacity-40 font-bold uppercase">Thermal</p>
+                            <p class="text-xl font-black">27.5°C</p>
                         </div>
                     </div>
-                    <div class="box-container flex items-center gap-4">
-                        <div class="pixar-3d w-14 h-14">
+                    <div class="box-container flex items-center gap-3 reveal-card" style="animation-delay: 0.5s;">
+                        <div class="pixar-3d w-12 h-12">
                             <svg viewBox="0 0 100 100">
                                 <path d="M50 15 L85 45 L85 85 L15 85 L15 45 Z" fill="#2ecc71" />
                                 <rect x="35" y="50" width="30" height="8" rx="2" fill="white" opacity="0.6" />
@@ -193,33 +193,33 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-[10px] opacity-40 font-bold uppercase" id="lbl-health">Health</p>
-                            <p class="text-2xl font-black">Excellent</p>
+                            <p class="text-[10px] opacity-40 font-bold uppercase">Health</p>
+                            <p class="text-xl font-black">Stable</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live Graph -->
-                <div class="box-container h-60">
-                    <div class="flex justify-between items-center mb-4">
-                        <p class="sketch-font text-xs uppercase opacity-40 tracking-widest" id="lbl-curve">Power Graph</p>
-                        <span class="text-[9px] font-bold px-2 py-1 rounded bg-blue-500/10" style="color:var(--accent)">1.3.9 STABLE</span>
+                <div class="box-container h-52 reveal-card" style="animation-delay: 0.6s;">
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="sketch-font text-xs uppercase opacity-40 tracking-widest animate-sketch">Power Link Visualization</p>
+                        <span class="text-[9px] font-bold text-blue-500">LIVE SYNC</span>
                     </div>
                     <canvas id="chart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Language & Tip Footer -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Footer -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 reveal-card" style="animation-delay: 0.7s;">
             <div class="box-container border-l-8" style="border-left-color:var(--accent)">
-                <p class="calligraphy text-2xl opacity-80" id="tip-text">Avoid 100% full cycles to double battery lifecycle.</p>
+                <p class="calligraphy text-2xl opacity-80" id="tip-text">Avoid 100% full cycles to preserve long-term health.</p>
             </div>
-            <div class="box-container flex items-center justify-between px-8">
-                <button onclick="toggleLang()" class="font-black uppercase tracking-tighter text-sm">
-                    Lang: <span id="lang-label" style="color:var(--accent)">EN</span>
+            <div class="box-container flex items-center justify-between px-6">
+                <button onclick="toggleLang()" class="sketch-font font-black uppercase text-xs">
+                    Language: <span id="lang-label" style="color:var(--accent)">ENGLISH</span>
                 </button>
-                <p class="text-[9px] opacity-30 font-bold uppercase">© 2025 FiRCHARGE • Studio Edition</p>
+                <p class="text-[10px] opacity-30 font-bold uppercase">© 2025 FiRCHARGE</p>
             </div>
         </div>
 
@@ -232,20 +232,14 @@
 
         const translations = {
             en: {
-                lockT: "Awaiting USB Power", 
-                statusC: "Charging Active", statusD: "Power Disconnected",
-                rem: "To 100%: ", full: "Battery Fully Charged",
-                temp: "Thermal", health: "Health", curve: "Power Graph Blueprint",
-                tip: "Keep between 20-80% for maximum longevity.",
-                lang: "EN"
+                lockT: "Connect Power Signal", statusC: "Energy Active", statusD: "Link Severed",
+                rem: "To 100%: ", full: "Fully Charged", tip: "Avoid 100% full cycles to preserve long-term health.",
+                lang: "ENGLISH", curve: "Power Link Visualization"
             },
             ms: {
-                lockT: "Menunggu Kuasa USB",
-                statusC: "Pengecasan Aktif", statusD: "Kuasa Terputus",
-                rem: "Hingga 100%: ", full: "Bateri Cas Penuh",
-                temp: "Suhu", health: "Kesihatan", curve: "Blueprint Graf Kuasa",
-                tip: "Kekalkan antara 20-80% untuk jangka hayat maksimum.",
-                lang: "BM"
+                lockT: "Sambung Isyarat Kuasa", statusC: "Tenaga Aktif", statusD: "Sambungan Terputus",
+                rem: "Hingga 100%: ", full: "Cas Penuh", tip: "Elakkan cas 100% setiap hari untuk memanjangkan hayat sel.",
+                lang: "BAHASA MELAYU", curve: "Visualisasi Aliran Kuasa"
             }
         };
 
@@ -268,6 +262,7 @@
                 chart.data.datasets[0].backgroundColor = accent + '15';
                 chart.update();
             }
+            reanimateSketch();
         }
 
         function toggleMode() {
@@ -280,11 +275,17 @@
             currentLang = currentLang === 'en' ? 'ms' : 'en';
             const t = translations[currentLang];
             document.getElementById('lock-title').innerText = t.lockT;
-            document.getElementById('lbl-temp').innerText = t.temp;
-            document.getElementById('lbl-health').innerText = t.health;
-            document.getElementById('lbl-curve').innerText = t.curve;
             document.getElementById('tip-text').innerText = t.tip;
             document.getElementById('lang-label').innerText = t.lang;
+            reanimateSketch();
+        }
+
+        function reanimateSketch() {
+            document.querySelectorAll('.animate-sketch').forEach(el => {
+                el.style.animation = 'none';
+                el.offsetHeight; 
+                el.style.animation = null;
+            });
         }
 
         function updateClock() {
@@ -301,10 +302,7 @@
                     const charging = battery.charging;
                     const t = translations[currentLang];
 
-                    // UI States
                     document.getElementById('usb-lock').classList.toggle('lock-off', charging);
-                    document.getElementById('main-battery-card').classList.toggle('is-charging', charging);
-                    
                     document.getElementById('bat-level').innerText = level + '%';
                     document.getElementById('fluid-fill').style.height = level + '%';
                     
