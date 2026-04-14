@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoltStream Pro - AI Battery Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Version Tracking -->
+    <!-- Web Version: 1.0.2 -->
+    <!-- Android Build: 1.0.2-v24 -->
+
+    <style>
+        :root {
+            --bg-dark: #05070a;
+            --card-dark: rgba(17, 25, 40, 0.75);
+            --accent-blue: #00d2ff;
+            --accent-green: #39ff14;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-x: hidden;
+        }
+
+        .dark-mode {
+            background-color: var(--bg-dark);
+            color: white;
+        }
+
+        .light-mode {
+            background-color: #f0f2f5;
+            color: #1a1a1a;
+        }
+
+        .glass-card {
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        .light-mode .glass-card {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+        }
+
+        .dark-mode .glass-card {
+            background-color: var(--card-dark);
+        }
+
+        /* 3D Icon Glow */
+        .icon-3d {
+            filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.2));
+            transform: perspective(500px) rotateX(10deg);
+        }
+
+        /* Charging Pulse Animation */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px var(--accent-green); }
+            50% { box-shadow: 0 0 20px var(--accent-green); }
+            100% { box-shadow: 0 0 5px var(--accent-green); }
+        }
+
+        .charging-active {
+            animation: pulse-glow 2s infinite;
+        }
+
+        #usb-overlay {
+            display: none;
+            backdrop-filter: blur(20px);
+            z-index: 100;
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="dark-mode min-h-screen">
+
+    <!-- USB PLUG-IN OVERLAY -->
+    <div id="usb-overlay" class="fixed inset-0 flex flex-col items-center justify-center bg-black/80 text-white p-6 text-center">
+        <svg class="w-32 h-32 mb-6 icon-3d" viewBox="0 0 100 100">
+            <defs>
+                <linearGradient id="usbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#00d2ff;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#3a7bd5;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path fill="url(#usbGrad)" d="M30,20 L70,20 L70,40 L30,40 Z M40,40 L60,40 L60,80 L40,80 Z" />
+            <circle cx="50" cy="90" r="5" fill="#39ff14" />
+        </svg>
+        <h1 class="text-3xl font-bold mb-2" id="msg-connect">Please Connect USB Charger</h1>
+        <p class="opacity-70" id="msg-sub-connect">Real-time diagnostics require an active power source.</p>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <main class="max-w-4xl mx-auto p-4 md:p-8">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight">VOLT<span class="text-blue-500">STREAM</span></h1>
+                <p class="text-xs opacity-50" id="v-label">Version 1.0.2-Stable</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="toggleLang()" class="glass-card px-4 py-2 text-sm font-bold hover:scale-105 transition-transform">
+                    <span id="lang-btn">BM</span>
+                </button>
+                <button onclick="toggleTheme()" class="glass-card px-4 py-2 text-sm font-bold hover:scale-105 transition-transform">
+                    <span id="theme-icon">🌞</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Battery Percentage Card -->
+            <div class="glass-card p-8 flex flex-col items-center justify-center md:col-span-1 relative overflow-hidden">
+                <div class="relative z-10 text-center">
+                    <span class="text-sm font-semibold opacity-60 uppercase tracking-widest" id="lbl-status">Charging</span>
+                    <div class="text-7xl font-black my-2" id="bat-level">0%</div>
+                    <div class="status-pill bg-green-500/20 text-green-400" id="bat-health-pill">Excellent Health</div>
+                </div>
+                <!-- 3D Water Effect Background -->
+                <div id="wave-bg" class="absolute bottom-0 left-0 w-full bg-blue-500/10 transition-all duration-1000" style="height: 0%"></div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="md:col-span-2 grid grid-cols-2 gap-4">
+                <div class="glass-card p-4 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center text-2xl icon-3d">🔥</div>
+                    <div>
+                        <p class="text-xs opacity-60" id="lbl-temp">Temperature</p>
+                        <p class="font-bold text-lg">34.2°C</p>
+                    </div>
+                </div>
+                <div class="glass-card p-4 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center text-2xl icon-3d">⚡</div>
+                    <div>
+                        <p class="text-xs opacity-60" id="lbl-volt">Voltage</p>
+                        <p class="font-bold text-lg">4.2V</p>
+                    </div>
+                </div>
+                <div class="glass-card p-4 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-2xl icon-3d">⏱️</div>
+                    <div>
+                        <p class="text-xs opacity-60" id="lbl-rem">Remaining</p>
+                        <p class="font-bold text-lg" id="bat-time">--</p>
+                    </div>
+                </div>
+                <div class="glass-card p-4 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center text-2xl icon-3d">🔋</div>
+                    <div>
+                        <p class="text-xs opacity-60" id="lbl-cap">Capacity</p>
+                        <p class="font-bold text-lg">5000mAh</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="glass-card p-6 md:col-span-3">
+                <h3 class="text-lg font-bold mb-4" id="lbl-curve">Real-time Charging Curve</h3>
+                <div class="h-64 w-full">
+                    <canvas id="chargeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Optimization Tips -->
+            <div class="md:col-span-3">
+                <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                    <span class="icon-3d">🚀</span> <span id="lbl-tips-title">Battery Optimization Tips</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card p-4 text-sm">
+                        <p class="font-bold text-blue-400 mb-1" id="tip1-t">Smart Charge</p>
+                        <p class="opacity-70" id="tip1-d">Limit charging to 80% to prolong battery lifespan by up to 200%.</p>
+                    </div>
+                    <div class="glass-card p-4 text-sm">
+                        <p class="font-bold text-orange-400 mb-1" id="tip2-t">Thermal Control</p>
+                        <p class="opacity-70" id="tip2-d">Keep the device cool during charging. High heat degrades lithium cells.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-12 text-center text-xs opacity-40">
+            <p>© 2025 VoltStream AI. Web Build 1.0.2 | Android SDK 34 Wrapper Ready</p>
+        </footer>
+    </main>
+
+    <script>
+        let isDarkMode = true;
+        let currentLang = 'en';
+        let batteryChart;
+        let historyData = [0];
+        let labels = ["0s"];
+
+        const translations = {
+            en: {
+                connect: "Please Connect USB Charger",
+                subconnect: "Real-time diagnostics require an active power source.",
+                status: "Charging",
+                health: "Excellent Health",
+                temp: "Temperature",
+                volt: "Voltage",
+                rem: "Until Full",
+                cap: "Capacity",
+                curve: "Real-time Charging Curve",
+                tips: "Battery Optimization Tips",
+                tip1t: "Smart Charge",
+                tip1d: "Limit charging to 80% to prolong battery lifespan.",
+                tip2t: "Thermal Control",
+                tip2d: "Keep the device cool. Avoid heavy tasks while charging.",
+                full: "Battery Full"
+            },
+            ms: {
+                connect: "Sila Sambung Pengecas USB",
+                subconnect: "Diagnostik masa nyata memerlukan sumber kuasa aktif.",
+                status: "Sedang Mengecas",
+                health: "Kesihatan Cemerlang",
+                temp: "Suhu",
+                volt: "Voltan",
+                rem: "Sehingga Penuh",
+                cap: "Kapasiti",
+                curve: "Lengkung Pengecasan Masa Nyata",
+                tips: "Tips Optimasi Bateri",
+                tip1t: "Caj Pintar",
+                tip1d: "Hadkan pengecasan ke 80% untuk memanjangkan hayat bateri.",
+                tip2t: "Kawalan Terma",
+                tip2d: "Pastikan peranti sejuk. Elakkan penggunaan berat semasa mengecas.",
+                full: "Bateri Penuh"
+            }
+        };
+
+        // Initialize Chart
+        function initChart() {
+            const ctx = document.getElementById('chargeChart').getContext('2d');
+            batteryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Battery Level %',
+                        data: historyData,
+                        borderColor: '#00d2ff',
+                        backgroundColor: 'rgba(0, 210, 255, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        async function updateBatteryStatus() {
+            const battery = await navigator.getBattery();
+            
+            function updateUI() {
+                const level = Math.round(battery.level * 100);
+                
+                // USB Plugin Check
+                if (!battery.charging) {
+                    document.getElementById('usb-overlay').style.display = 'flex';
+                } else {
+                    document.getElementById('usb-overlay').style.display = 'none';
+                }
+
+                // Update text
+                document.getElementById('bat-level').innerText = level + '%';
+                document.getElementById('wave-bg').style.height = level + '%';
+                
+                // Time calculation
+                if (battery.charging && battery.chargingTime !== Infinity) {
+                    const mins = Math.floor(battery.chargingTime / 60);
+                    document.getElementById('bat-time').innerText = mins + " min";
+                } else if (level >= 100) {
+                    document.getElementById('bat-time').innerText = translations[currentLang].full;
+                } else {
+                    document.getElementById('bat-time').innerText = "--";
+                }
+
+                // Update Chart
+                const now = new Date();
+                const timeStr = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+                
+                if (historyData.length > 20) {
+                    historyData.shift();
+                    labels.shift();
+                }
+                historyData.push(level);
+                labels.push(timeStr);
+                batteryChart.update();
+            }
+
+            updateUI();
+            battery.addEventListener('chargingchange', updateUI);
+            battery.addEventListener('levelchange', updateUI);
+            battery.addEventListener('chargingtimechange', updateUI);
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const btn = document.getElementById('theme-icon');
+            
+            if (isDarkMode) {
+                body.classList.replace('light-mode', 'dark-mode');
+                btn.innerText = '🌞';
+            } else {
+                body.classList.replace('dark-mode', 'light-mode');
+                btn.innerText = '🌙';
+            }
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'en' ? 'ms' : 'en';
+            const t = translations[currentLang];
+            
+            document.getElementById('lang-btn').innerText = currentLang === 'en' ? 'BM' : 'EN';
+            document.getElementById('msg-connect').innerText = t.connect;
+            document.getElementById('msg-sub-connect').innerText = t.subconnect;
+            document.getElementById('lbl-status').innerText = t.status;
+            document.getElementById('bat-health-pill').innerText = t.health;
+            document.getElementById('lbl-temp').innerText = t.temp;
+            document.getElementById('lbl-volt').innerText = t.volt;
+            document.getElementById('lbl-rem').innerText = t.rem;
+            document.getElementById('lbl-cap').innerText = t.cap;
+            document.getElementById('lbl-curve').innerText = t.curve;
+            document.getElementById('lbl-tips-title').innerText = t.tips;
+            document.getElementById('tip1-t').innerText = t.tip1t;
+            document.getElementById('tip1-d').innerText = t.tip1d;
+            document.getElementById('tip2-t').innerText = t.tip2t;
+            document.getElementById('tip2-d').innerText = t.tip2d;
+        }
+
+        window.onload = () => {
+            initChart();
+            updateBatteryStatus();
+            // Start periodic chart updates to simulate "live" pulse
+            setInterval(() => {
+                if (batteryChart.data.datasets[0].data.length > 0) {
+                    batteryChart.update();
+                }
+            }, 3000);
+        };
+    </script>
+</body>
+</html>
