@@ -6,213 +6,218 @@
     
     <!-- 
         FiRCHARGE SUPREME 2026 
-        VERSION: 1.8.2-Elite-Smoke
-        ANDROID REF: v52
+        VERSION: 1.8.4-Ultimate-Elite
+        ANDROID REF: v54
+        DESIGN: Compact One-Page Multiverse
     -->
     
-    <title>FiRCHARGE Elite | v1.8.2</title>
+    <title>FiRCHARGE Elite | v1.8.4</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@700&family=Outfit:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@700&family=Outfit:wght@500;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --accent: #ff0000; --bg: #020406; --text: #ffffff; --card: rgba(255,255,255,0.04); --smoke-rgb: 255, 0, 0; }
+        :root { --accent: #ff0000; --bg: #020406; --text: #ffffff; --card: rgba(255,255,255,0.06); }
 
-        /* --- THEME SYSTEM --- */
-        [data-theme="spiderman"] { --accent: #ff2a2a; --smoke-rgb: 255, 42, 42; --char-emoji: "🕷️"; }
-        [data-theme="warner"] { --accent: #ffcc00; --smoke-rgb: 255, 204, 0; --char-emoji: "🛡️"; }
-        [data-theme="mickey"] { --accent: #facc15; --smoke-rgb: 250, 204, 21; --char-emoji: "🐭"; }
+        /* --- THEME COLORS SYNC --- */
+        [data-theme="spiderman"] { --accent: #ff2a2a; --char-emoji: "🕷️"; --lock-emoji: "🕸️"; }
+        [data-theme="warner"] { --accent: #ffcc00; --char-emoji: "🛡️"; --lock-emoji: "🎬"; }
+        [data-theme="mickey"] { --accent: #facc15; --char-emoji: "🐭"; --lock-emoji: "🏰"; }
 
         /* --- DUAL MODE --- */
-        [data-mode="white"] { --bg: #f8fafc; --text: #0f172a; --card: rgba(255,255,255,0.9); --border: rgba(0,0,0,0.1); }
-        [data-mode="dark"] { --bg: #020406; --text: #ffffff; --card: rgba(255,255,255,0.03); --border: rgba(255,255,255,0.1); }
+        [data-mode="white"] { --bg: #f0f4f8; --text: #0f172a; --card: rgba(255,255,255,0.95); --border: rgba(0,0,0,0.15); }
+        [data-mode="dark"] { --bg: #020406; --text: #ffffff; --card: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.1); }
 
         * { font-family: 'Architects Daughter', cursive; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--bg); color: var(--text); 
-            margin: 0; min-height: 100vh; transition: background 0.5s ease;
-            overflow-x: hidden;
+            margin: 0; height: 100vh; width: 100vw; transition: background 0.5s ease;
+            overflow: hidden; display: flex; flex-direction: column;
         }
 
-        #smoke-canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.6; }
+        /* --- FULL SCREEN WHITE SMOKE --- */
+        #smoke-canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.7; filter: blur(4px); }
 
-        /* --- REVEAL ANIMATIONS --- */
+        /* --- ANIMATIONS --- */
         @keyframes sketch-reveal { from { clip-path: inset(0 100% 0 0); opacity: 0; } to { clip-path: inset(0 0 0 0); opacity: 1; } }
-        .sketch-anim { display: inline-block; animation: sketch-reveal 2.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-        .calligraphy { font-family: 'Caveat', cursive; font-size: 1.6rem; line-height: 1.2; color: var(--accent); }
+        .sketch-anim { display: inline-block; animation: sketch-reveal 2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        .calligraphy { font-family: 'Caveat', cursive; font-size: 1.8rem; color: var(--accent); }
 
         .box-container {
-            border: 2px solid var(--border);
-            background: var(--card);
-            backdrop-filter: blur(30px);
-            border-radius: 28px; padding: 18px;
+            border: 2px solid var(--border); background: var(--card);
+            backdrop-filter: blur(40px); border-radius: 24px; padding: 15px;
             cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative; overflow: hidden;
         }
-        .box-container:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .box-container:hover { border-color: var(--accent); transform: translateY(-3px); }
 
-        /* Charging Rainbow VFX */
-        @keyframes rainbow-glow { 0% { filter: hue-rotate(0deg) brightness(1); } 100% { filter: hue-rotate(360deg) brightness(1.4); } }
-        .is-charging .rainbow-fx { animation: rainbow-glow 3s infinite linear; filter: drop-shadow(0 0 15px var(--accent)); }
+        /* Rainbow Charging Glow */
+        @keyframes rainbow-glow { 0% { filter: hue-rotate(0deg) brightness(1.2); } 100% { filter: hue-rotate(360deg) brightness(1.5); } }
+        .is-charging .rainbow-vfx { animation: rainbow-glow 3s infinite linear; filter: drop-shadow(0 0 15px var(--accent)); }
 
-        /* Liquid Core */
         .liquid-wave {
-            position: absolute; bottom: 0; left: 50%; width: 220%; height: 220%;
+            position: absolute; bottom: 0; left: 50%; width: 250%; height: 250%;
             background: var(--accent); opacity: 0.1; border-radius: 38%;
-            transform: translateX(-50%); transition: bottom 2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%); transition: bottom 2s ease;
             z-index: 0; pointer-events: none;
         }
-        .is-charging .liquid-wave { animation: rotate-wave 8s infinite linear; opacity: 0.25; }
+        .is-charging .liquid-wave { animation: rotate-wave 8s infinite linear; opacity: 0.2; }
         @keyframes rotate-wave { from { transform: translateX(-50%) rotate(0deg); } to { transform: translateX(-50%) rotate(360deg); } }
 
-        /* Detail Modal */
+        /* Modals */
         #detail-overlay {
             position: fixed; inset: 0; z-index: 10000;
-            background: rgba(0,0,0,0.92); display: none;
+            background: rgba(0,0,0,0.9); display: none;
             align-items: center; justify-content: center;
             backdrop-filter: blur(25px); padding: 20px;
         }
-        .modal-card { transform: scale(0.9); opacity: 0; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-card { transform: scale(0.9); opacity: 0; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-card.active { transform: scale(1); opacity: 1; }
 
-        /* Layout Elements */
-        .bat-text { font-size: clamp(4.5rem, 15vw, 7.5rem); font-weight: 900; letter-spacing: -6px; line-height: 1; z-index: 10; color: var(--text); }
-        .stat-label { font-size: 11px; font-weight: 900; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; color: var(--text); }
-        .stat-value { font-size: 1.4rem; font-weight: 900; color: var(--accent); }
+        /* Text Adjustments */
+        .bat-text { font-size: clamp(4rem, 15vw, 7rem); font-weight: 900; letter-spacing: -5px; line-height: 1; color: var(--text); }
+        .stat-label { font-size: 14px; font-weight: 900; opacity: 0.8; text-transform: uppercase; color: var(--text); }
+        .stat-value { font-size: 1.8rem; font-weight: 900; color: var(--accent); }
         
         #usb-lock {
             position: fixed; inset: 0; z-index: 9990; background: var(--bg);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 1s cubic-bezier(0.7, 0, 0.3, 1);
+            transition: 0.8s cubic-bezier(0.7, 0, 0.3, 1);
         }
-        .lock-off { transform: translateY(-100%); pointer-events: none; opacity: 0; }
+        .lock-off { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 
-        .theme-btn { width: 50px; height: 50px; border-radius: 16px; font-size: 24px; cursor: pointer; border: 2px solid rgba(128,128,128,0.3); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-        .theme-btn:hover { transform: scale(1.15) rotate(10deg); border-color: var(--accent); }
+        .theme-btn { 
+            width: 50px; height: 50px; border-radius: 15px; font-size: 24px; cursor: pointer; 
+            border: 2px solid rgba(128,128,128,0.3); transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; 
+        }
         
-        canvas { max-height: 140px !important; }
+        canvas { max-height: 110px !important; }
+
+        /* Compact Scroll Control */
+        main { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+        main::-webkit-scrollbar { width: 0px; }
     </style>
 </head>
-<body class="p-3 sm:p-6" onclick="initAudio()">
+<body class="p-2 sm:p-5" onclick="initAudio()">
 
+    <!-- FULL SCREEN WHITE SMOKE -->
     <canvas id="smoke-canvas"></canvas>
 
     <!-- USB HARDWARE LOCK -->
     <div id="usb-lock">
         <div class="text-9xl mb-6 animate-bounce" id="lock-icon">🕸️</div>
-        <h1 class="text-3xl font-black uppercase sketch-anim" id="lock-msg">Awaiting Neural Link</h1>
-        <p class="calligraphy">FiRCHARGE Supreme v1.8.2</p>
+        <h1 class="text-4xl font-black uppercase sketch-anim" id="lock-msg" style="color:var(--accent)">System Offline</h1>
+        <p class="calligraphy" style="color:var(--text)">FiRCHARGE Ultimate Elite v1.8.4</p>
     </div>
 
     <!-- DETAIL MODAL -->
     <div id="detail-overlay" onclick="closeDetail()">
-        <div id="modal-card" class="box-container modal-card max-w-lg w-full bg-black border-accent p-10 text-center" onclick="event.stopPropagation()">
+        <div id="modal-card" class="box-container modal-card max-w-lg w-full bg-black border-accent p-8 text-center" onclick="event.stopPropagation()">
             <div id="modal-icon" class="text-8xl mb-4">🔍</div>
-            <h2 id="modal-title" class="text-4xl text-blue-400 mb-4 sketch-anim" style="color:var(--accent)">Neural Intel</h2>
+            <h2 id="modal-title" class="text-4xl mb-4 sketch-anim" style="color:var(--accent)">Neural Data</h2>
             <p id="modal-desc" class="calligraphy text-white opacity-90 leading-relaxed"></p>
-            <button onclick="closeDetail()" class="mt-10 px-12 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest shadow-xl" style="background:var(--accent); color: white;">Acknowledge</button>
+            <button onclick="closeDetail()" class="mt-8 px-12 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest" style="background:var(--accent); color: #fff;">Close Link</button>
         </div>
     </div>
 
-    <main class="max-w-6xl mx-auto space-y-4">
-        
-        <!-- Header Controls -->
-        <header class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div class="box-container flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-black tracking-tighter">FiR<span style="color:var(--accent)">CHARGE</span></h1>
-                    <p class="text-[10px] font-bold uppercase opacity-60">Supreme 2026 v1.8.2</p>
-                </div>
-                <div class="flex gap-2 border-l border-white/10 pl-4">
-                    <button class="theme-btn" style="background:#ff2a2a" onclick="setTheme('spiderman')">🕷️</button>
-                    <button class="theme-btn" style="background:#003399" onclick="setTheme('warner')">🎬</button>
-                    <button class="theme-btn" style="background:#ffffff" onclick="setTheme('mickey')">🐭</button>
-                    <button onclick="toggleMode()" class="theme-btn bg-gray-500/10" id="mode-btn">🌞</button>
-                </div>
+    <!-- HEADER CONTROLS -->
+    <header class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+        <div class="box-container flex items-center justify-between py-2 px-4">
+            <div>
+                <h1 class="text-3xl font-black tracking-tighter">FiR<span style="color:var(--accent)">CHARGE</span></h1>
+                <p class="text-[10px] font-bold uppercase opacity-60">Elite v1.8.4 • © 2026</p>
             </div>
-
-            <div class="box-container flex items-center justify-between px-8">
-                <div class="text-right">
-                    <div id="clock" class="text-3xl font-black tracking-tight" style="color:var(--accent)">00:00:00</div>
-                    <div id="date" class="text-[11px] opacity-50 uppercase font-bold tracking-widest">---</div>
-                </div>
-                <button onclick="toggleLang()" class="px-6 py-2 border-2 border-white/20 rounded-2xl text-xs font-black uppercase hover:bg-white/10" id="lang-btn">EN / BM</button>
+            <div class="flex gap-2 border-l border-white/10 pl-3">
+                <button class="theme-btn" style="background:#ff2a2a" onclick="setTheme('spiderman')">🕷️</button>
+                <button class="theme-btn" style="background:#003399" onclick="setTheme('warner')">🎬</button>
+                <button class="theme-btn" style="background:#ffffff" onclick="setTheme('mickey')">🐭</button>
+                <button onclick="toggleMode()" class="theme-btn bg-gray-500/10" id="mode-btn">🌞</button>
             </div>
-        </header>
+        </div>
 
-        <!-- Main Real-time Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div class="box-container flex items-center justify-between px-6 py-2">
+            <div class="text-right">
+                <div id="clock" class="text-3xl font-black tracking-tight" style="color:var(--accent)">00:00:00</div>
+                <div id="date" class="text-[11px] opacity-60 uppercase font-bold tracking-widest">---</div>
+            </div>
+            <button onclick="toggleLang()" class="px-5 py-2 border-2 border-white/20 rounded-xl text-xs font-black uppercase hover:bg-white/10" id="lang-btn">EN / BM</button>
+        </div>
+    </header>
+
+    <main class="space-y-3">
+        <!-- MAIN ANALYTICS GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
             
             <!-- Center Power Core -->
-            <div class="box-container md:col-span-5 min-h-[420px] flex flex-col items-center justify-center text-center" id="main-card" onclick="openDetail('battery')">
+            <div class="box-container md:col-span-5 min-h-[380px] flex flex-col items-center justify-center text-center" id="main-card" onclick="openDetail('battery')">
                 <div class="liquid-wave" id="fluid-fill"></div>
-                <div id="theme-character" class="text-8xl mb-4 z-10 animate-bounce">🕷️</div>
-                <div class="rainbow-fx w-48 h-48 mb-4 z-10 relative">
+                <div id="theme-character" class="text-8xl mb-3 z-10 animate-bounce">🕷️</div>
+                <div class="rainbow-vfx w-44 h-44 mb-2 z-10 relative">
                     <svg viewBox="0 0 100 100" class="w-full h-full">
                         <rect x="25" y="15" width="50" height="75" rx="15" fill="rgba(255,255,255,0.02)" stroke="var(--accent)" stroke-width="4"/>
-                        <rect id="svg-liquid" x="28" y="50" width="44" height="38" rx="10" fill="var(--accent)" opacity="0.5"/>
+                        <rect id="svg-liquid" x="28" y="50" width="44" height="38" rx="10" fill="var(--accent)" opacity="0.6"/>
                         <path id="charge-bolt" d="M50 35 L40 55 L50 55 L45 75 L60 50 L50 50 L55 35 Z" fill="#fff" />
                     </svg>
                 </div>
                 <div id="bat-level" class="bat-text">0%</div>
-                <div id="status-tag" class="z-10 bg-blue-500/20 px-6 py-2 rounded-full text-xs font-black uppercase mt-4 animate-pulse sketch-anim">Syncing...</div>
+                <div id="status-tag" class="z-10 bg-blue-500/20 px-5 py-1 rounded-full text-[12px] font-black uppercase mt-3 animate-pulse sketch-anim">Neural Syncing...</div>
             </div>
 
-            <!-- Analytics Matrix -->
-            <div class="md:col-span-7 grid grid-cols-1 gap-4">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="box-container flex flex-col items-center p-5" onclick="openDetail('full_time')">
-                        <p class="stat-label" id="lbl-to-full">To 100%</p>
+            <!-- Side Stats Matrix -->
+            <div class="md:col-span-7 grid grid-cols-1 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="box-container flex flex-col items-center p-4" onclick="openDetail('full_time')">
+                        <p class="stat-label" id="lbl-full">To 100%</p>
                         <p id="full-time" class="stat-value">--</p>
                     </div>
-                    <div class="box-container flex flex-col items-center p-5" onclick="openDetail('charge_time')">
-                        <p class="stat-label" id="lbl-charge-dur">Charge Duration</p>
+                    <div class="box-container flex flex-col items-center p-4" onclick="openDetail('charge_time')">
+                        <p class="stat-label" id="lbl-charge">Session</p>
                         <p id="charge-duration" class="stat-value" style="color:var(--text)">00:00</p>
                     </div>
-                    <div class="box-container flex flex-col items-center p-5" onclick="openDetail('use_time')">
-                        <p class="stat-label" id="lbl-use-est">Usage Est.</p>
+                    <div class="box-container flex flex-col items-center p-4" onclick="openDetail('use_time')">
+                        <p class="stat-label" id="lbl-use">Est. Use</p>
                         <p id="use-time" class="stat-value" style="color:#22c55e">~00h</p>
                     </div>
-                    <div class="box-container flex flex-col items-center p-5" onclick="openDetail('recharge')">
-                        <p class="stat-label" id="lbl-cycle">Next Cycle</p>
+                    <div class="box-container flex flex-col items-center p-4" onclick="openDetail('recharge')">
+                        <p class="stat-label" id="lbl-cycle">Recharge</p>
                         <p id="recharge-status" class="stat-value">Ready</p>
                     </div>
                 </div>
 
-                <div class="box-container flex-1 min-h-[200px]" onclick="openDetail('graph')">
-                    <p class="text-[12px] uppercase font-black opacity-50 mb-3 sketch-anim" id="lbl-graph">Ionic Stability Matrix</p>
+                <!-- Stability Graph -->
+                <div class="box-container flex-1 min-h-[160px]" onclick="openDetail('graph')">
+                    <p class="text-[14px] uppercase font-black opacity-60 mb-2 sketch-anim" id="lbl-graph" style="color:var(--accent)">Ionic Stability Matrix</p>
                     <canvas id="chart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Intelligence Hub (Tips) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Pro Tips Bottom Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="box-container border-t-4 border-red-500" onclick="openDetail('tip_heat')">
                 <p class="font-black text-red-500 text-sm uppercase mb-1" id="lbl-t1">Thermal Guard</p>
-                <p class="calligraphy text-2xl" id="lbl-d1">Stop 3D tasks if hot.</p>
+                <p class="calligraphy" id="lbl-d1">Henti tugasan berat jika panas.</p>
             </div>
             <div class="box-container border-t-4 border-yellow-500" onclick="openDetail('tip_range')">
-                <p class="font-black text-yellow-500 text-sm uppercase mb-1" id="lbl-t2">Golden Zone</p>
-                <p class="calligraphy text-2xl" id="lbl-d2">Keep 20% - 80% range.</p>
+                <p class="font-black text-yellow-500 text-sm uppercase mb-1" id="lbl-t2">Zon Emas</p>
+                <p class="calligraphy" id="lbl-d2">Kekalkan julat 20% - 80%.</p>
             </div>
             <div class="box-container border-t-4 border-blue-500" onclick="openDetail('tip_cal')">
-                <p class="font-black text-blue-500 text-sm uppercase mb-1" id="lbl-t3">Maintenance</p>
-                <p class="calligraphy text-2xl" id="lbl-d3">Calibrate monthly.</p>
+                <p class="font-black text-blue-500 text-sm uppercase mb-1" id="lbl-t3">Penyelenggaraan</p>
+                <p class="calligraphy" id="lbl-d3">Kalibrasi setiap bulan.</p>
             </div>
         </div>
-
-        <footer class="py-6 text-center">
-            <p class="calligraphy text-3xl opacity-30">FiRCHARGE • Engineered for Tomorrow.</p>
-            <p class="text-[10px] uppercase tracking-[0.5em] opacity-40 mt-2">© Copyright FiRCHARGE 2026 | Supreme v1.8.2-Elite</p>
-        </footer>
-
     </main>
 
+    <footer class="py-2 text-center">
+        <p class="text-[10px] uppercase tracking-[0.6em] opacity-40">© FiRCHARGE 2026 | Supreme v1.8.4 Elite</p>
+    </footer>
+
     <script>
-        // --- SMOKE ENGINE ---
+        // --- WHITE SMOKE ENGINE ---
         const canvas = document.getElementById('smoke-canvas');
         const sCtx = canvas.getContext('2d');
         let particles = [];
@@ -222,71 +227,69 @@
             constructor() { this.reset(); }
             reset() {
                 this.x = Math.random() * canvas.width;
-                this.y = canvas.height + 50;
-                this.size = Math.random() * 80 + 30;
-                this.speedY = Math.random() * 0.7 + 0.2;
-                this.opacity = Math.random() * 0.3;
-                const rgb = getComputedStyle(document.documentElement).getPropertyValue('--smoke-rgb').trim();
-                this.color = `rgba(${rgb}, ${this.opacity})`;
+                this.y = canvas.height + 100;
+                this.size = Math.random() * 180 + 60;
+                this.speedY = Math.random() * 0.4 + 0.1;
+                this.opacity = Math.random() * 0.15;
+                this.vx = (Math.random() - 0.5) * 0.3;
             }
-            update() { this.y -= this.speedY; if (this.y < -this.size) this.reset(); }
+            update() {
+                this.y -= this.speedY; this.x += this.vx;
+                if (this.y < -this.size) this.reset();
+            }
             draw() {
-                sCtx.beginPath();
-                sCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                const rgb = getComputedStyle(document.documentElement).getPropertyValue('--smoke-rgb').trim();
-                sCtx.fillStyle = `rgba(${rgb}, ${this.opacity})`;
-                sCtx.fill();
+                sCtx.beginPath(); sCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                sCtx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; sCtx.fill();
             }
         }
-        function initSmoke() { particles = []; for (let i = 0; i < 20; i++) particles.push(new Particle()); }
+        function initSmoke() { particles = []; for (let i = 0; i < 30; i++) particles.push(new Particle()); }
         function animateSmoke() { sCtx.clearRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateSmoke); }
 
-        // --- DATA & LOGIC ---
-        let audioCtx, chart, battery, chargeStartTime = null, currentLang = 'en', isAutoStopped = false, lastChargingState = false;
+        // --- CORE DATA & LOGIC ---
+        let audioCtx, chart, battery, chargeStartTime = null, currentLang = 'en', lastChargingState = false, isAutoStopped = false;
 
         const translations = {
             en: {
                 lock: "Awaiting Power Link", lang_btn: "ENGLISH",
-                battery_title: "Core Intel", battery_desc: "The ionic core is stabilizing. Rainbow vfx indicates a synchronized high-voltage neural link.",
-                full_time_title: "Precision Timer", full_time_desc: "Estimated minutes and seconds until the lithium layers reach 100% saturation.",
-                charge_time_title: "Session Duration", charge_time_desc: "Total connected time. Helps detect faulty cables or slow adapters.",
-                use_time_title: "Usage Intel", use_time_desc: "AI prediction based on current background power drain before neural shutdown.",
-                recharge_title: "Cycle Readiness", recharge_desc: "Intelligence suggests waiting for 20% to avoid chemical aging of the cells.",
-                graph_title: "Ionic Stability", graph_desc: "Real-time voltage consistency. Flat curves mean high-quality power delivery.",
-                voice_start: "FiRCHARGE. Power Linked. Elite Smoke Core active.",
-                voice_stop: "Link Severed. Session Duration Saved.",
-                voice_full: "Battery 100%. Neural Protection Engaged.",
+                battery_title: "Core Integrity", battery_desc: "Neural layers are monitoring the ionic exchange. Rainbow vfx indicates a synchronized high-voltage neural link.",
+                full_time_title: "Precision Timer", full_time_desc: "Calculated time based on real-time mA intake to reach absolute 100% capacity.",
+                charge_time_title: "Active Session", charge_time_desc: "Total connected duration. Monitoring charger wattage and cable quality.",
+                use_time_title: "Usage Intel", use_time_desc: "AI prediction based on current background tasks before neural shutdown.",
+                recharge_title: "Cycle Readiness", recharge_desc: "Wait until 20% to start a new cycle for maximum cell longevity.",
+                graph_title: "Ionic Stability", graph_desc: "Real-time voltage consistency. Flat curves mean a high-quality power link.",
+                voice_start: "FiRCHARGE. Power linked. Smoke core active.",
+                voice_stop: "Link severed. Charging halted.",
+                voice_full: "Battery 100%. Protective Stop Engaged.",
                 full_tag: "Protected", charging_tag: "Flowing", disc_tag: "Severed",
-                lbl_full: "To 100%", lbl_charge: "Charge Duration", lbl_use: "Usage Est.", lbl_cycle: "Cycle", lbl_graph: "Ionic Stability Matrix",
+                lbl_full: "To 100%", lbl_charge: "Session", lbl_use: "Est. Use", lbl_cycle: "Recharge", lbl_graph: "Stability Matrix",
                 lbl_t1: "Thermal Guard", lbl_d1: "Stop 3D tasks if hot.", lbl_t2: "Golden Zone", lbl_d2: "Keep 20% - 80% range.", lbl_t3: "Maintenance", lbl_d3: "Calibrate monthly."
             },
             ms: {
                 lock: "Menunggu Sambungan", lang_btn: "BAHASA MELAYU",
-                battery_title: "Intel Teras", battery_desc: "Teras ionik sedang stabil. Vfx pelangi menunjukkan sambungan neural voltan tinggi yang selari.",
-                full_time_title: "Pemasa Tepat", full_time_desc: "Anggaran minit dan saat sehingga lapisan lithium mencapai ketepuan 100%.",
-                charge_time_title: "Tempoh Sesi", charge_time_desc: "Jumlah masa disambung. Membantu mengesan kabel rosak atau pengecas perlahan.",
-                use_time_title: "Intel Penggunaan", use_time_desc: "Ramalan AI berdasarkan penggunaan kuasa latar belakang semasa sebelum peranti mati.",
-                recharge_title: "Ketersediaan Kitaran", recharge_desc: "AI mencadangkan tunggu sehingga 20% untuk mengelakkan penuaan kimia sel.",
-                graph_title: "Kestabilan Ionik", graph_desc: "Konsistensi voltan masa nyata. Keluk rata bermaksud bekalan kuasa berkualiti tinggi.",
-                voice_start: "FiRCHARGE. Kuasa Disambung. Teras Asap Elite aktif.",
-                voice_stop: "Sambungan Putus. Tempoh Pengecasan disimpan.",
+                battery_title: "Integriti Teras", battery_desc: "Lapisan neural sedang memantau pertukaran ionik. Vfx pelangi menunjukkan sambungan neural voltan tinggi.",
+                full_time_title: "Baki Masa", full_time_desc: "Masa yang dikira berdasarkan pengambilan mA semasa untuk mencapai kapasiti 100%.",
+                charge_time_title: "Sesi Aktif", charge_time_desc: "Jumlah masa disambung. Memantau watt pengecas dan kualiti kabel.",
+                use_time_title: "Intel Penggunaan", use_time_desc: "Ramalan AI berdasarkan tugas latar belakang semasa sebelum peranti mati.",
+                recharge_title: "Ketersediaan Kitaran", recharge_desc: "Tunggu sehingga 20% sebelum cas semula untuk hayat sel maksimum.",
+                graph_title: "Kestabilan Ionik", graph_desc: "Konsistensi voltan masa nyata. Keluk rata bermaksud sambungan berkualiti.",
+                voice_start: "FiRCHARGE. Kuasa disambung. Teras asap aktif.",
+                voice_stop: "Sambungan putus. Pengecasan dihentikan.",
                 voice_full: "Bateri 100%. Perlindungan Neural Aktif.",
                 full_tag: "Dilindungi", charging_tag: "Mengalir", disc_tag: "Terputus",
-                lbl_full: "Hingga 100%", lbl_charge: "Tempoh Cas", lbl_use: "Anggaran Guna", lbl_cycle: "Kitaran", lbl_graph: "Matriks Kestabilan Ionik",
-                lbl_t1: "Perisai Terma", lbl_d1: "Henti tugasan berat jika panas.", lbl_t2: "Zon Emas", lbl_d2: "Kekalkan julat 20% - 80%.", lbl_t3: "Penyelenggaraan", lbl_d3: "Kalibrasi bulanan."
+                lbl_full: "Hingga 100%", lbl_charge: "Sesi", lbl_use: "Anggaran", lbl_cycle: "Kitaran", lbl_graph: "Matriks Kestabilan",
+                lbl_t1: "Perisai Terma", lbl_d1: "Henti tugas berat jika panas.", lbl_t2: "Zon Emas", lbl_d2: "Kekalkan antara 20% - 80%.", lbl_t3: "Penyelenggaraan", lbl_d3: "Kalibrasi bulanan."
             }
         };
 
         const themes = {
-            spiderman: { emoji: "🕷️", lock: "🕸️", voice: "Spiderman mode. Charging with great responsibility." },
-            warner: { emoji: "🛡️", lock: "🎬", voice: "Warner Bros mode. The show starts now." },
+            spiderman: { emoji: "🕷️", lock: "🕸️", voice: "Spiderman mode. Ready for action." },
+            warner: { emoji: "🛡️", lock: "🎬", voice: "Warner Bros mode. The cinematic charge starts now." },
             mickey: { emoji: "🐭", lock: "🏰", voice: "Mickey Mouse mode. Oh boy! Time to power up!" }
         };
 
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         function speak(text) {
-            if(!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
+            if(!window.speechSynthesis) return; window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = currentLang === 'en' ? 'en-US' : 'ms-MY';
             utterance.rate = 1.0; window.speechSynthesis.speak(utterance);
@@ -296,23 +299,20 @@
             document.documentElement.setAttribute('data-theme', theme);
             document.getElementById('theme-character').innerText = themes[theme].emoji;
             document.getElementById('lock-icon').innerText = themes[theme].lock;
-            speak(themes[theme].voice);
-            updateVisuals();
+            speak(themes[theme].voice); updateVisuals();
         }
 
         function toggleMode() {
             const cur = document.documentElement.getAttribute('data-mode');
             const target = cur === 'dark' ? 'white' : 'dark';
             document.documentElement.setAttribute('data-mode', target);
-            document.getElementById('mode-btn').innerText = target === 'dark' ? '🌞' : '🌙';
-            updateVisuals();
+            document.getElementById('mode-btn').innerText = target === 'dark' ? '🌞' : '🌙'; updateVisuals();
         }
 
         function updateVisuals() {
             if(chart) {
                 const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-                chart.data.datasets[0].borderColor = accent;
-                chart.update();
+                chart.data.datasets[0].borderColor = accent; chart.update();
             }
         }
 
@@ -321,17 +321,14 @@
             const t = translations[currentLang];
             document.getElementById('lang-btn').innerText = t.lang_btn;
             document.getElementById('lock-msg').innerText = t.lock;
-            document.getElementById('lbl-to-full').innerText = t.lbl_full;
-            document.getElementById('lbl-charge-dur').innerText = t.lbl_charge;
-            document.getElementById('lbl-use-est').innerText = t.lbl_use;
+            document.getElementById('lbl-full').innerText = t.lbl_full;
+            document.getElementById('lbl-charge').innerText = t.lbl_charge;
+            document.getElementById('lbl-use').innerText = t.lbl_use;
             document.getElementById('lbl-cycle').innerText = t.lbl_cycle;
             document.getElementById('lbl-graph').innerText = t.lbl_graph;
-            document.getElementById('lbl-t1').innerText = t.lbl_t1;
-            document.getElementById('lbl-d1').innerText = t.lbl_d1;
-            document.getElementById('lbl-t2').innerText = t.lbl_t2;
-            document.getElementById('lbl-d2').innerText = t.lbl_d2;
-            document.getElementById('lbl-t3').innerText = t.lbl_t3;
-            document.getElementById('lbl-d3').innerText = t.lbl_d3;
+            document.getElementById('lbl-t1').innerText = t.lbl_t1; document.getElementById('lbl-d1').innerText = t.lbl_d1;
+            document.getElementById('lbl-t2').innerText = t.lbl_t2; document.getElementById('lbl-d2').innerText = t.lbl_d2;
+            document.getElementById('lbl-t3').innerText = t.lbl_t3; document.getElementById('lbl-d3').innerText = t.lbl_d3;
             document.querySelectorAll('.sketch-anim').forEach(el => { el.style.animation = 'none'; el.offsetHeight; el.style.animation = null; });
         }
 
@@ -370,10 +367,9 @@
                 } else {
                     isAutoStopped = false;
                     document.getElementById('status-tag').innerText = charging ? t.charging_tag : t.disc_tag;
-                    document.getElementById('status-tag').style.background = charging ? "rgba(59,130,246,0.2)" : "rgba(128,128,128,0.2)";
+                    document.getElementById('status-tag').style.background = charging ? "rgba(59,130,246,0.3)" : "rgba(128,128,128,0.2)";
                 }
 
-                // Analytics
                 if (charging && battery.chargingTime !== Infinity) {
                     const diff = battery.chargingTime;
                     document.getElementById('full-time').innerText = `${Math.floor(diff/60)}m ${diff%60}s`;
@@ -401,7 +397,7 @@
             const ctx = document.getElementById('chart').getContext('2d');
             chart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: Array(15).fill(''), datasets: [{ data: Array(15).fill(0), borderColor: '#ff0000', tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(255,0,0,0.05)' }] },
+                data: { labels: Array(15).fill(''), datasets: [{ data: Array(15).fill(0), borderColor: '#ff0000', tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(255,255,255,0.01)' }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } }, plugins: { legend: { display: false } } }
             });
             setTheme('spiderman');
