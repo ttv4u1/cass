@@ -6,11 +6,11 @@
     
     <!-- 
         FiRCHARGE VERSION TRACKING 
-        WEB: 1.4.6-Energy-Core
-        ANDROID: 1.4.6-v42
+        WEB: 1.4.7-Ultimate
+        ANDROID: 1.4.7-v43
     -->
     
-    <title>FiRCHARGE Pro | Energy Core v1.4.6</title>
+    <title>FiRCHARGE Pro | Ultimate v1.4.7</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -33,9 +33,9 @@
             overflow-x: hidden;
         }
 
-        /* Handwriting Reveal */
+        /* Handwriting Sketch Animation */
         @keyframes reveal-sketch { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-        .animate-sketch { display: inline-block; animation: reveal-sketch 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
+        .animate-sketch { display: inline-block; animation: reveal-sketch 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
 
         .box-container {
             border: 1px solid var(--border);
@@ -47,40 +47,36 @@
         }
         .box-container:hover { transform: translateY(-5px); border-color: var(--accent); }
 
-        /* --- REALISTIC LIQUID ANIMATION --- */
-        .liquid-container {
-            position: absolute; inset: 0; 
-            border-radius: inherit; overflow: hidden;
-            z-index: 0; pointer-events: none;
+        /* --- MODAL REVEAL ANIMATION --- */
+        #detail-overlay {
+            position: fixed; inset: 0; z-index: 10000;
+            background: rgba(0,0,0,0.85); display: none;
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(20px); padding: 20px;
         }
+        .modal-card {
+            transform: scale(0.8); opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-card.active { transform: scale(1); opacity: 1; }
+
+        /* --- LIQUID & ELECTRIC ANIMATIONS --- */
+        .liquid-container { position: absolute; inset: 0; border-radius: inherit; overflow: hidden; z-index: 0; pointer-events: none; }
         .liquid-wave {
-            position: absolute; bottom: 0; left: 50%;
-            width: 250%; height: 250%;
-            background: var(--accent);
-            opacity: 0.15;
-            border-radius: 40%;
-            transform: translateX(-50%);
-            transition: bottom 2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute; bottom: 0; left: 50%; width: 250%; height: 250%;
+            background: var(--accent); opacity: 0.15; border-radius: 38%;
+            transform: translateX(-50%); transition: bottom 2s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .is-charging .liquid-wave {
-            animation: rotate-wave 10s infinite linear;
-        }
-        @keyframes rotate-wave {
-            from { transform: translateX(-50%) rotate(0deg); }
-            to { transform: translateX(-50%) rotate(360deg); }
-        }
+        .is-charging .liquid-wave { animation: rotate-wave 8s infinite linear; }
+        @keyframes rotate-wave { from { transform: translateX(-50%) rotate(0deg); } to { transform: translateX(-50%) rotate(360deg); } }
 
-        /* --- ELECTRIC CHARGING ANIMATION --- */
         .electric-bolt {
-            position: absolute; width: 100%; height: 100%;
-            top: 0; left: 0; z-index: 5;
-            opacity: 0; pointer-events: none;
-            filter: drop-shadow(0 0 8px var(--accent));
+            position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 5;
+            opacity: 0; pointer-events: none; filter: drop-shadow(0 0 10px var(--accent));
         }
-        .is-charging .electric-bolt { opacity: 0.8; animation: flicker 0.2s infinite; }
-        @keyframes flicker { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.4; } }
+        .is-charging .electric-bolt { opacity: 1; animation: flicker 0.15s infinite; }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-        /* Lock Screen */
         #usb-lock {
             position: fixed; inset: 0; z-index: 9990;
             background: var(--bg); display: flex; flex-direction: column; 
@@ -89,18 +85,11 @@
         }
         .lock-off { transform: translateY(-100%); pointer-events: none; }
 
-        /* Detail Overlay */
-        #detail-overlay {
-            position: fixed; inset: 0; z-index: 10000;
-            background: rgba(0,0,0,0.9);
-            display: none; align-items: center; justify-content: center;
-            backdrop-filter: blur(20px); padding: 20px;
-        }
-
-        .bat-text { font-size: clamp(4rem, 12vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 1; position: relative; z-index: 10; }
+        .bat-text { font-size: clamp(4rem, 12vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 1; z-index: 10; }
         .sketch-font { font-family: 'Architects Daughter', cursive; }
         .calligraphy { font-family: 'Caveat', cursive; }
         .theme-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
+        .is-protected { filter: grayscale(1) brightness(0.7) !important; }
     </style>
 </head>
 <body class="p-2 md:p-6" onclick="initAudio()">
@@ -108,23 +97,23 @@
     <!-- USB LOCK HUD -->
     <div id="usb-lock">
         <div class="pixar-3d w-28 h-28 mb-6">
-            <svg viewBox="0 0 100 100">
+            <svg viewBox="0 0 100 100" class="animate-bounce">
                 <rect x="30" y="30" width="40" height="45" rx="12" fill="var(--accent)" />
                 <rect x="42" y="15" width="6" height="15" rx="2" fill="#fff" />
                 <rect x="54" y="15" width="6" height="15" rx="2" fill="#fff" />
             </svg>
         </div>
-        <h1 class="text-2xl font-black uppercase sketch-font animate-sketch" id="lock-title">Awaiting Neural Link</h1>
-        <p class="calligraphy text-xl opacity-60 mt-2">v1.4.6 Energy Core Active</p>
+        <h1 class="text-2xl font-black uppercase sketch-font animate-sketch" id="lock-title">Waiting for Power Link</h1>
+        <p class="calligraphy text-xl opacity-60 mt-2">Neural Link v1.4.7</p>
     </div>
 
     <!-- DETAIL MODAL -->
     <div id="detail-overlay" onclick="closeDetail()">
-        <div class="box-container max-w-lg w-full bg-black/90 border-accent p-10 text-center" onclick="event.stopPropagation()">
-            <div id="modal-icon" class="text-6xl mb-6">🔍</div>
-            <h2 id="modal-title" class="sketch-font text-3xl text-blue-400 mb-4">Core Intel</h2>
+        <div id="modal-card" class="box-container modal-card max-w-lg w-full bg-black/95 border-accent p-10 text-center" onclick="event.stopPropagation()">
+            <div id="modal-icon" class="text-7xl mb-6">🔍</div>
+            <h2 id="modal-title" class="sketch-font text-3xl text-blue-400 mb-4">Neural Data</h2>
             <p id="modal-desc" class="calligraphy text-2xl opacity-90 leading-relaxed"></p>
-            <button onclick="closeDetail()" class="mt-8 px-10 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest">Acknowledge</button>
+            <button onclick="closeDetail()" class="mt-8 px-10 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">Acknowledge</button>
         </div>
     </div>
 
@@ -135,7 +124,7 @@
             <div class="box-container flex flex-row items-center gap-4 w-full md:w-auto">
                 <div>
                     <h1 class="text-2xl font-black">FiR<span style="color:var(--accent)">CHARGE</span></h1>
-                    <p class="text-[9px] sketch-font text-blue-500 font-bold uppercase tracking-widest">v1.4.6 Energy Core</p>
+                    <p class="text-[9px] sketch-font text-blue-500 font-bold uppercase tracking-widest">Ultimate v1.4.7</p>
                 </div>
                 <div class="flex gap-2 border-l border-white/10 pl-4">
                     <div class="theme-dot" style="background:#00d2ff" onclick="setTheme('cyber')"></div>
@@ -149,11 +138,11 @@
                     <div id="clock" class="text-3xl font-black tracking-tighter" style="color:var(--accent)">00:00:00</div>
                     <div id="date" class="text-[10px] opacity-40 uppercase font-bold">---</div>
                 </div>
-                <button onclick="toggleMode()" class="p-3 bg-white/5 rounded-2xl text-2xl shadow-inner" id="mode-btn">🌞</button>
+                <button onclick="toggleMode()" class="p-3 bg-white/5 rounded-2xl text-2xl" id="mode-btn">🌞</button>
             </div>
         </header>
 
-        <!-- Dashboard -->
+        <!-- Main Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
             
             <!-- Battery Centerpiece -->
@@ -163,29 +152,27 @@
                 </div>
                 
                 <div class="pixar-3d w-48 h-48 mb-4 z-10 relative" id="main-icon">
-                    <!-- ELECTRIC BOLTS SVG -->
                     <svg class="electric-bolt" viewBox="0 0 100 100">
-                        <path d="M50 10 L45 35 L55 35 L50 60 L60 60 L45 90" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
-                        <path d="M20 30 L25 50 L15 50 L20 70" stroke="white" stroke-width="1.5" fill="none" opacity="0.6"/>
-                        <path d="M80 30 L75 50 L85 50 L80 70" stroke="white" stroke-width="1.5" fill="none" opacity="0.6"/>
+                        <path d="M50 10 L45 35 L55 35 L50 60 L60 60 L45 90" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <path d="M20 30 L25 50 L15 50 L20 70" stroke="white" stroke-width="2" fill="none" opacity="0.6"/>
                     </svg>
 
                     <svg viewBox="0 0 100 100" class="w-full h-full">
                         <rect x="25" y="15" width="50" height="75" rx="15" fill="rgba(128,128,128,0.05)" stroke="var(--accent)" stroke-width="3"/>
                         <rect x="40" y="8" width="20" height="7" rx="3" fill="var(--accent)" />
-                        <!-- Static Liquid for Icon -->
-                        <rect id="svg-liquid" x="28" y="50" width="44" height="38" rx="10" fill="var(--accent)" opacity="0.3"/>
+                        <rect id="svg-liquid" x="28" y="50" width="44" height="38" rx="10" fill="var(--accent)" opacity="0.4"/>
+                        <path id="status-icon" d="M50 35 L40 55 L50 55 L45 75 L60 50 L50 50 L55 35 Z" fill="#fff" class="opacity-0 transition-opacity"/>
                     </svg>
                 </div>
                 <div id="bat-level" class="bat-text">0%</div>
-                <div id="status-tag" class="z-10 bg-blue-500/20 px-4 py-1 rounded-full text-[10px] font-black uppercase mt-4 animate-pulse">Scanning Signal</div>
+                <div id="status-tag" class="z-10 bg-blue-500/20 px-4 py-1 rounded-full text-[10px] font-black uppercase mt-4 animate-pulse">Scanning...</div>
             </div>
 
             <!-- Stats -->
             <div class="md:col-span-7 grid grid-cols-1 gap-5">
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     <div class="box-container flex flex-col items-center p-4" onclick="openDetail('time')">
-                        <p class="text-[9px] opacity-40 font-bold uppercase mb-1">To Full</p>
+                        <p class="text-[9px] opacity-40 font-bold uppercase mb-1">Remaining</p>
                         <p id="bat-time" class="text-lg font-black" style="color:var(--accent)">00m 00s</p>
                     </div>
                     <div class="box-container flex flex-col items-center p-4" onclick="openDetail('thermal')">
@@ -208,11 +195,11 @@
         <!-- Footer -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="box-container border-l-8" style="border-left-color:var(--accent)" onclick="openDetail('tip')">
-                <p class="calligraphy text-2xl opacity-80" id="tip-text">AI Energy Core is balancing the ionic distribution.</p>
+                <p class="calligraphy text-2xl opacity-80" id="tip-text">Design capacity monitoring is active. Ensuring cell longevity.</p>
             </div>
             <div class="box-container flex items-center justify-between px-6">
                 <button onclick="toggleLang()" class="sketch-font font-black uppercase text-xs">Lang: <span id="lang-label" style="color:var(--accent)">EN</span></button>
-                <button onclick="simulateFull()" class="text-[9px] opacity-20 border px-2 py-1 rounded">Test 100%</button>
+                <div class="text-[9px] opacity-30 font-bold uppercase">FiRCHARGE Ultimate © 2025</div>
             </div>
         </div>
 
@@ -223,76 +210,85 @@
         let lastLevel = 0;
         let currentLang = 'en';
         let isAutoStopped = false;
-        let lastChargingState = false;
+        let lastChargingState = null;
 
         const translations = {
             en: {
-                lock: "Awaiting Neural Link",
-                battery_title: "Liquid Core Intel",
-                battery_desc: "The liquid energy is flowing. Electric bolts indicate active ion migration through the lithium layers.",
-                mah_title: "Storage Capacity",
-                mah_desc: "5000 mAh represents the total 'bucket' size of your battery. Efficiency depends on cell health.",
-                voice_full: "Battery 100% full. Neural protection activated. Charging halted.",
-                voice_stop: "Charging stopped. System secured.",
+                lock: "Initialize Power Signal",
+                battery_title: "Core Integrity",
+                battery_desc: "Liquid Energy Core is active. Electric bolts signify a high-wattage ionic exchange within the lithium layers.",
+                thermal_title: "Thermal Mapping",
+                thermal_desc: "Current heat dissipation is optimal. No throttling detected.",
+                mah_title: "Design Capacity",
+                mah_desc: "The total energy bucket size. Your battery health determines how much of this bucket can be used.",
+                time_title: "Precision Timer",
+                time_desc: "Calculated based on current flow (mA). Accuracy increases as the flow stabilizes.",
+                graph_title: "Pulse Diagnostics",
+                graph_desc: "Visual representation of voltage stability. Peaks represent turbo-charge bursts.",
+                tip_title: "Expert Wisdom",
+                tip_desc: "Unplug after 100% to stop electron pressure. Deep cycles kill battery health faster.",
                 voice_start: "Power linked. Energy core initiated.",
-                full_tag: "Protected", charging_tag: "Flowing", disc_tag: "Disconnected",
-                lang: "EN"
+                voice_stop: "Power link severed. Charging halted.",
+                voice_full: "Battery 100% full. Neural protection activated. Charging halted.",
+                full_tag: "Protected", charging_tag: "Flowing", disc_tag: "Disconnected", lang: "EN"
             },
             ms: {
-                lock: "Menunggu Sambungan",
-                battery_title: "Intel Teras Cecair",
-                battery_desc: "Tenaga cecair sedang mengalir. Kilat elektrik menunjukkan migrasi ion aktif melalui lapisan lithium.",
-                mah_title: "Kapasiti Simpanan",
-                mah_desc: "5000 mAh mewakili saiz 'baldi' bateri anda. Kecekapan bergantung kepada kesihatan sel.",
+                lock: "Mulakan Isyarat Kuasa",
+                battery_title: "Integriti Teras",
+                battery_desc: "Teras Tenaga Cecair aktif. Kilat elektrik menandakan pertukaran ionik watt tinggi dalam lapisan lithium.",
+                thermal_title: "Pemetaan Terma",
+                thermal_desc: "Pelesapan haba semasa adalah optimum. Tiada sekatan dikesan.",
+                mah_title: "Kapasiti Reka Bentuk",
+                mah_desc: "Jumlah saiz 'baldi' tenaga. Kesihatan bateri menentukan berapa banyak baldi ini boleh digunakan.",
+                time_title: "Pemasa Tepat",
+                time_desc: "Dikira berdasarkan aliran semasa (mA). Ketepatan meningkat apabila aliran stabil.",
+                graph_title: "Diagnostik Nadi",
+                graph_desc: "Representasi visual kestabilan voltan. Puncak mewakili letusan cas turbo.",
+                tip_title: "Hikmah Pakar",
+                tip_desc: "Cabut pengecas selepas 100% untuk henti tekanan elektron. Kitaran dalam merosakkan bateri lebih cepat.",
+                voice_start: "Kuasa disambung. Teras tenaga bermula.",
+                voice_stop: "Kuasa terputus. Pengecasan dihentikan.",
                 voice_full: "Bateri seratus peratus penuh. Perlindungan neural diaktifkan. Pengecasan dihentikan.",
-                voice_stop: "Pengecasan dihentikan. Sistem selamat.",
-                voice_start: "Kuasa disambung. Teras tenaga dimulakan.",
-                full_tag: "Dilindungi", charging_tag: "Mengalir", disc_tag: "Terputus",
-                lang: "BM"
+                full_tag: "Dilindungi", charging_tag: "Mengalir", disc_tag: "Terputus", lang: "BM"
             }
         };
 
+        // --- CORE AUDIO & VOICE ---
         function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 
-        function speak(text) {
+        function speak(msgKey) {
             if(!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = currentLang === 'en' ? 'en-US' : 'ms-MY';
-            msg.rate = 1; msg.pitch = 1.2;
-            window.speechSynthesis.speak(msg);
+            window.speechSynthesis.cancel(); // Stop current speech
+            const t = translations[currentLang];
+            const utterance = new SpeechSynthesisUtterance(t[msgKey]);
+            utterance.lang = currentLang === 'en' ? 'en-US' : 'ms-MY';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.1;
+            window.speechSynthesis.speak(utterance);
         }
 
+        // --- MODAL ENGINE ---
         function openDetail(key) {
             const overlay = document.getElementById('detail-overlay');
+            const card = document.getElementById('modal-card');
             const t = translations[currentLang];
             const icons = { battery: '🌊', time: '⌛', thermal: '🌡️', mah: '⚡', graph: '📊', tip: '💡' };
+            
             document.getElementById('modal-icon').innerText = icons[key] || '🔍';
             document.getElementById('modal-title').innerText = t[key + '_title'] || "Detail";
             document.getElementById('modal-desc').innerText = t[key + '_desc'] || "Neural data link established.";
-            overlay.classList.add('modal-active');
+            
+            overlay.style.display = 'flex';
+            setTimeout(() => card.classList.add('active'), 10);
         }
 
-        function closeDetail() { document.getElementById('detail-overlay').classList.remove('modal-active'); }
-
-        function simulateFull() { 
-            lastLevel = 99; 
-            handleAutoStop(); 
-            document.getElementById('bat-level').innerText = "100%";
-            document.getElementById('fluid-wave').style.bottom = "0%";
+        function closeDetail() {
+            const card = document.getElementById('modal-card');
+            card.classList.remove('active');
+            setTimeout(() => document.getElementById('detail-overlay').style.display = 'none', 400);
         }
 
-        function handleAutoStop() {
-            if(isAutoStopped) return;
-            isAutoStopped = true;
-            const t = translations[currentLang];
-            document.getElementById('main-card').classList.remove('is-charging');
-            document.getElementById('status-tag').innerText = t.full_tag;
-            document.getElementById('status-tag').style.background = "#ef4444";
-            document.getElementById('main-card').classList.add('is-protected');
-            speak(t.voice_full);
-        }
-
+        // --- BATTERY LOGIC ---
         async function initBattery() {
             try {
                 battery = await navigator.getBattery();
@@ -301,11 +297,37 @@
                     const charging = battery.charging;
                     const t = translations[currentLang];
 
+                    // Voice Logic
+                    if (lastChargingState !== null && charging !== lastChargingState) {
+                        if (charging && level < 100) speak('voice_start');
+                        if (!charging) speak('voice_stop');
+                    }
+                    lastChargingState = charging;
+
+                    // Auto-Stop UI & Sound
+                    if (level >= 100 && charging) {
+                        if (!isAutoStopped) {
+                            speak('voice_full');
+                            isAutoStopped = true;
+                        }
+                        document.getElementById('main-card').classList.add('is-protected');
+                        document.getElementById('status-tag').innerText = t.full_tag;
+                        document.getElementById('status-tag').style.background = "#ef4444";
+                        document.getElementById('status-icon').style.opacity = '1';
+                        document.getElementById('status-icon').style.fill = '#ef4444';
+                    } else {
+                        isAutoStopped = false;
+                        document.getElementById('main-card').classList.remove('is-protected');
+                        document.getElementById('status-tag').innerText = charging ? t.charging_tag : t.disc_tag;
+                        document.getElementById('status-tag').style.background = charging ? "rgba(59,130,246,0.2)" : "rgba(128,128,128,0.2)";
+                        document.getElementById('status-icon').style.opacity = charging ? '1' : '0';
+                        document.getElementById('status-icon').style.fill = '#fff';
+                    }
+
+                    // UI Updates
                     document.getElementById('usb-lock').classList.toggle('lock-off', charging);
                     document.getElementById('main-card').classList.toggle('is-charging', charging);
                     document.getElementById('bat-level').innerText = level + '%';
-                    
-                    // Liquid Animation Height
                     document.getElementById('fluid-wave').style.bottom = `-${100 - level}%`;
                     
                     const svgLiquid = document.getElementById('svg-liquid');
@@ -313,52 +335,40 @@
                     svgLiquid.setAttribute('y', 90 - (level * 0.7));
 
                     if (charging && battery.chargingTime !== Infinity) {
-                        const totalSecs = battery.chargingTime;
-                        const mins = Math.floor(totalSecs / 60);
-                        const secs = Math.floor(totalSecs % 60);
-                        document.getElementById('bat-time').innerText = `${mins}m ${secs}s`;
+                        const m = Math.floor(battery.chargingTime / 60);
+                        const s = Math.floor(battery.chargingTime % 60);
+                        document.getElementById('bat-time').innerText = `${m}m ${s}s`;
                     } else {
-                        document.getElementById('bat-time').innerText = "--";
+                        document.getElementById('bat-time').innerText = level >= 100 ? "READY" : "--";
                     }
 
-                    if(charging && !lastChargingState) speak(t.voice_start);
-                    else if(!charging && lastChargingState) speak(t.voice_stop);
-                    lastChargingState = charging;
-
-                    if(level >= 100 && charging) {
-                        handleAutoStop();
-                    } else if (!charging) {
-                        isAutoStopped = false;
-                        document.getElementById('status-tag').innerText = t.disc_tag;
-                        document.getElementById('status-tag').style.background = "rgba(128,128,128,0.2)";
-                        document.getElementById('main-card').classList.remove('is-protected');
-                    } else {
-                        isAutoStopped = false;
-                        document.getElementById('status-tag').innerText = t.charging_tag;
-                        document.getElementById('status-tag').style.background = "rgba(59,130,246,0.2)";
-                        document.getElementById('main-card').classList.remove('is-protected');
-                    }
-
-                    if(chart) { chart.data.datasets[0].data.push(level); chart.data.datasets[0].data.shift(); chart.update(); }
+                    if(chart) { chart.data.datasets[0].data.push(level); chart.data.datasets[0].data.shift(); chart.update('none'); }
                 };
                 
                 battery.onchargingchange = update;
                 battery.onlevelchange = update;
-                battery.onchargingtimechange = update;
                 update();
             } catch (e) { document.getElementById('usb-lock').classList.add('lock-off'); }
         }
 
+        // --- UTILS ---
         function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
             if(chart) { chart.data.datasets[0].borderColor = accent; chart.update(); }
         }
 
+        function toggleMode() {
+            const mode = document.documentElement.getAttribute('data-mode') === 'dark' ? 'white' : 'dark';
+            document.documentElement.setAttribute('data-mode', mode);
+            document.getElementById('mode-btn').innerText = mode === 'dark' ? '🌞' : '🌙';
+        }
+
         function toggleLang() {
             currentLang = currentLang === 'en' ? 'ms' : 'en';
             document.getElementById('lang-label').innerText = translations[currentLang].lang;
             document.getElementById('lock-title').innerText = translations[currentLang].lock;
+            document.querySelectorAll('.animate-sketch').forEach(el => { el.style.animation = 'none'; el.offsetHeight; el.style.animation = null; });
         }
 
         function updateClock() {
@@ -373,7 +383,7 @@
             const ctx = document.getElementById('chart').getContext('2d');
             chart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: Array(15).fill(''), datasets: [{ data: Array(15).fill(0), borderColor: '#00d2ff', tension: 0.4, pointRadius: 0 }] },
+                data: { labels: Array(15).fill(''), datasets: [{ data: Array(15).fill(0), borderColor: '#00d2ff', tension: 0.4, pointRadius: 0, fill: true, backgroundColor: 'rgba(0,210,255,0.03)' }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } }, plugins: { legend: { display: false } } }
             });
             setTheme('cyber');
