@@ -1,232 +1,297 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="cyber" data-mode="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FiRCHARGE Pro | Sonic 1.2.5</title>
+    <title>FiRCHARGE Pro | Pixar Edition</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Caveat:wght@700&family=Outfit:wght@400;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg-dark: #02050a; --neon: #00d2ff; --energy: #39ff14; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg-dark); color: #f1f5f9; margin: 0; padding: 0; overflow-x: hidden; min-height: 100vh; }
+        :root { --accent: #00d2ff; --bg: #05070a; --text: #ffffff; }
+
+        [data-theme="cyber"] { --accent: #00d2ff; --glow: rgba(0, 210, 255, 0.5); }
+        [data-theme="solar"] { --accent: #ff6a00; --glow: rgba(255, 106, 0, 0.5); }
+        [data-theme="bio"] { --accent: #32ff7e; --glow: rgba(50, 255, 126, 0.5); }
+        [data-theme="royal"] { --accent: #7d5fff; --glow: rgba(125, 95, 255, 0.5); }
+
+        [data-mode="white"] { --bg: #f8fafc; --text: #0f172a; --card: rgba(255,255,255,0.8); }
+        [data-mode="dark"] { --bg: #05070a; --text: #ffffff; --card: rgba(255,255,255,0.03); }
+
+        body { 
+            font-family: 'Outfit', sans-serif; background-color: var(--bg); color: var(--text); 
+            margin: 0; min-height: 100vh; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
         .box-container {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 1.5rem; padding: 1rem; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; justify-content: center;
+            border: 1px solid rgba(128,128,128,0.1);
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
         }
 
-        .bat-text { font-size: clamp(4rem, 15vw, 8rem); font-weight: 900; letter-spacing: -4px; line-height: 1; z-index: 10; }
-        .clock-text { font-size: clamp(1.5rem, 5vw, 2.5rem); font-weight: 900; color: var(--neon); }
+        /* 3D Pixar Style Icon Base */
+        .icon-3d-wrap {
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.2));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .icon-3d-wrap:hover { transform: translateY(-5px) scale(1.05); }
 
-        .pixar-3d {
-            width: clamp(50px, 12vw, 100px); height: auto;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
-            animation: float 3s infinite ease-in-out; z-index: 10;
+        .glass-highlight {
+            fill: rgba(255, 255, 255, 0.3);
+            filter: blur(2px);
         }
 
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        .energy-wave {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: linear-gradient(0deg, rgba(0, 210, 255, 0.3) 0%, transparent 100%);
-            transition: height 1.5s ease-in-out; z-index: 0;
-        }
-
+        /* Animations */
         #usb-lock {
             position: fixed; inset: 0; z-index: 9999;
-            background: radial-gradient(circle at center, #0a1122 0%, #000 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px; transition: opacity 0.5s;
+            background: var(--bg); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center;
+            transition: transform 0.7s cubic-bezier(0.7, 0, 0.3, 1);
         }
-        .lock-off { opacity: 0; visibility: hidden; pointer-events: none; }
+        .lock-off { transform: translateY(-100%); pointer-events: none; }
 
-        .sketch-font { font-family: 'Architects Daughter', cursive; }
-        .calligraphy { font-family: 'Caveat', cursive; }
+        .bat-text { font-size: clamp(4rem, 15vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 1; }
+        
+        #fluid-bg {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(0deg, var(--accent) 0%, transparent 100%);
+            opacity: 0.15; transition: height 1.5s ease;
+        }
+
+        .theme-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body onclick="initAudio()">
 
-    <!-- USB HARDWARE LOCK -->
+    <!-- USB LOCK HUD -->
     <div id="usb-lock">
-        <img src="file:///android_res/drawable/icon_lock_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3106/3106842.png'" class="pixar-3d mb-4">
-        <h1 class="text-2xl sketch-font text-white">Sila Sambung USB</h1>
-        <p class="calligraphy text-blue-400 text-lg">FiRCHARGE Sonic v1.2.5</p>
+        <div class="icon-3d-wrap w-32 h-32 mb-6">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <defs>
+                    <linearGradient id="plugGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#4facfe" />
+                        <stop offset="100%" style="stop-color:#00f2fe" />
+                    </linearGradient>
+                </defs>
+                <!-- 3D Body -->
+                <rect x="30" y="30" width="40" height="45" rx="10" fill="url(#plugGrad)" />
+                <rect x="35" y="35" width="30" height="35" rx="5" fill="rgba(255,255,255,0.1)" />
+                <!-- 3D Pins -->
+                <rect x="40" y="15" width="6" height="15" rx="2" fill="#fff" />
+                <rect x="54" y="15" width="6" height="15" rx="2" fill="#fff" />
+                <!-- Gloss -->
+                <ellipse cx="45" cy="40" rx="10" ry="5" class="glass-highlight" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-black uppercase tracking-tighter">Connect Power</h1>
+        <p class="opacity-50 mt-2 font-bold">FiRCHARGE Pro Studio 1.3.7</p>
+        <button onclick="unlockManual()" class="mt-10 opacity-20 text-[10px] uppercase tracking-widest border border-white/20 px-4 py-1 rounded-full">Bypass Interface</button>
     </div>
 
     <!-- MAIN DASHBOARD -->
-    <main class="w-full max-w-4xl mx-auto p-4 md:p-8 space-y-4">
+    <main class="max-w-4xl mx-auto p-4 md:p-10 space-y-6">
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <header class="flex justify-between items-center box-container">
-                <div>
-                    <h1 class="text-xl font-black">FiR<span class="text-blue-500">CHARGE</span></h1>
-                    <p class="text-[9px] sketch-font text-blue-400 tracking-widest uppercase">Sonic Engine 1.2.5</p>
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="box-container flex flex-row items-center gap-4 w-full md:w-auto">
+                <h1 class="text-2xl font-black">FiR<span style="color:var(--accent)">CHARGE</span></h1>
+                <div class="flex gap-2 border-l border-white/10 pl-4">
+                    <div class="theme-dot" style="background:#00d2ff" onclick="setTheme('cyber')"></div>
+                    <div class="theme-dot" style="background:#ff6a00" onclick="setTheme('solar')"></div>
+                    <div class="theme-dot" style="background:#32ff7e" onclick="setTheme('bio')"></div>
+                    <div class="theme-dot" style="background:#7d5fff" onclick="setTheme('royal')"></div>
                 </div>
-                <button onclick="toggleLang()" class="px-4 py-2 border border-white/10 rounded-xl text-xs font-bold bg-white/5 uppercase">BM/EN</button>
-            </header>
+            </div>
 
-            <div class="box-container flex-row items-center justify-between px-6">
-                <div>
-                    <div id="live-time" class="clock-text">00:00:00</div>
-                    <div id="live-ampm" class="text-xs font-bold opacity-60">AM</div>
-                </div>
+            <div class="box-container flex flex-row justify-between items-center gap-6 w-full md:w-auto">
                 <div class="text-right">
-                    <p id="live-day" class="sketch-font text-blue-400">Day</p>
-                    <p id="live-date" class="text-[10px] opacity-40">00 Jan 2025</p>
+                    <div id="clock" class="text-3xl font-black" style="color:var(--accent)">00:00:00</div>
+                    <div id="date" class="text-[10px] opacity-40 font-bold uppercase tracking-widest">---</div>
                 </div>
+                <button onclick="toggleMode()" class="p-2 bg-white/5 rounded-2xl text-2xl border border-white/10">🌞</button>
             </div>
-        </div>
+        </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div class="box-container md:col-span-5 min-h-[320px] items-center">
-                <div class="energy-wave" id="fluid"></div>
-                <img src="file:///android_res/drawable/icon_battery_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3103/3103446.png'" class="pixar-3d mb-2">
-                <div class="bat-text" id="bat-level">0%</div>
-                <p id="bat-time" class="z-10 text-blue-300 font-bold mt-2 text-sm">Menghitung...</p>
+        <!-- Main Battery Card -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div class="box-container md:col-span-5 flex flex-col items-center justify-center min-h-[400px]">
+                <div id="fluid-bg"></div>
+                
+                <div class="icon-3d-wrap w-40 h-40 mb-4 z-10">
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <defs>
+                            <linearGradient id="batGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:var(--accent)" />
+                                <stop offset="100%" style="stop-color:var(--bg)" />
+                            </linearGradient>
+                        </defs>
+                        <!-- 3D Battery Body -->
+                        <rect x="25" y="15" width="50" height="75" rx="12" fill="rgba(128,128,128,0.1)" stroke="var(--accent)" stroke-width="2"/>
+                        <rect x="40" y="8" width="20" height="7" rx="3" fill="var(--accent)" />
+                        <!-- Liquid Content -->
+                        <rect id="liquid-level" x="27" y="50" width="46" height="38" rx="10" fill="url(#batGrad)" />
+                        <!-- Glossy Overlay -->
+                        <path d="M30 20 Q 50 15 70 20" stroke="white" stroke-width="2" opacity="0.4" fill="none" stroke-linecap="round"/>
+                        <rect x="30" y="25" width="10" height="50" rx="5" class="glass-highlight" />
+                    </svg>
+                </div>
+
+                <div id="bat-level" class="bat-text z-10">0%</div>
+                <div id="bat-status" class="z-10 font-black uppercase mt-4 tracking-widest text-sm" style="color:var(--accent)">Linking...</div>
             </div>
 
-            <div class="md:col-span-7 grid grid-cols-2 gap-4">
-                <div class="box-container flex-row items-center gap-3">
-                    <img src="file:///android_res/drawable/icon_temp_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2103/2103611.png'" class="w-10 h-10">
-                    <div><p class="text-[9px] opacity-50 uppercase">Temp</p><p class="text-lg font-black">30.2°C</p></div>
+            <!-- Stats & Chart -->
+            <div class="md:col-span-7 grid grid-cols-1 gap-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="box-container flex items-center gap-4">
+                        <div class="icon-3d-wrap w-12 h-12">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="40" y="10" width="20" height="70" rx="10" fill="#ff4757"/>
+                                <circle cx="50" cy="80" r="15" fill="#ff4757"/>
+                                <rect x="45" y="20" width="10" height="40" rx="5" fill="rgba(255,255,255,0.4)"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] opacity-40 font-bold uppercase">Thermal</p>
+                            <p class="text-xl font-black">28.9°C</p>
+                        </div>
+                    </div>
+                    <div class="box-container flex items-center gap-4">
+                        <div class="icon-3d-wrap w-12 h-12">
+                            <svg viewBox="0 0 100 100">
+                                <path d="M50 15 L80 40 L80 85 L20 85 L20 40 Z" fill="#2ecc71" rx="10"/>
+                                <rect x="35" y="45" width="30" height="10" rx="2" fill="white" opacity="0.5"/>
+                                <rect x="45" y="35" width="10" height="30" rx="2" fill="white" opacity="0.5"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] opacity-40 font-bold uppercase">Health</p>
+                            <p class="text-xl font-black">Excellent</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="box-container flex-row items-center gap-3">
-                    <img src="file:///android_res/drawable/icon_health_3d.webp" onerror="this.src='https://cdn-icons-png.flaticon.com/512/4228/4228705.png'" class="w-10 h-10">
-                    <div><p class="text-[9px] opacity-50 uppercase">Health</p><p class="text-lg font-black">Good</p></div>
-                </div>
-                <div class="box-container col-span-2 py-4 h-40">
+
+                <div class="box-container h-52 flex items-center justify-center">
                     <canvas id="chart"></canvas>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="box-container border-l-4 border-blue-500">
-                <h4 class="sketch-font text-blue-500 font-bold text-sm">Smart Protocol</h4>
-                <p class="calligraphy text-lg opacity-70" id="tip1">Elakkan cas 100% setiap hari untuk jaga sel.</p>
-            </div>
-            <div class="box-container border-l-4 border-orange-500">
-                <h4 class="sketch-font text-orange-500 font-bold text-sm">Thermal Guard</h4>
-                <p class="calligraphy text-lg opacity-70" id="tip2">Suhu tinggi musuh utama jangka hayat bateri.</p>
-            </div>
+        <!-- Footer Protocol -->
+        <div class="box-container text-center border-l-8" style="border-left-color:var(--accent)">
+            <p class="sketch-font text-xs uppercase opacity-40 mb-1">Charging Protocol</p>
+            <p class="calligraphy text-2xl opacity-80" id="tip-text">Avoid 100% full cycles to double battery lifecycle.</p>
         </div>
+
     </main>
 
     <script>
-        let currentLang = 'en';
-        let chart;
-        let audioCtx;
-        let hasAnnouncedFull = false;
-        let lastChargingStatus = false;
+        let audioCtx, chart, battery;
+        let lastLevel = 0;
+        let isCharging = false;
 
-        const langData = {
-            en: { days: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], months: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], wait: "Calculating...", full: "100% Charged", tip1: "Avoid 100% daily to prolong battery life.", tip2: "Heat is the #1 enemy of battery longevity." },
-            ms: { days: ["Ahad","Isnin","Selasa","Rabu","Khamis","Jumaat","Sabtu"], months: ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"], wait: "Menghitung...", full: "100% Penuh", tip1: "Elakkan cas 100% setiap hari untuk jaga sel.", tip2: "Suhu tinggi musuh utama jangka hayat bateri." }
-        };
+        function unlockManual() { document.getElementById('usb-lock').classList.add('lock-off'); }
 
-        function initAudio() { 
-            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+        function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+
+        function speak(text) {
+            if(!window.speechSynthesis) return;
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.rate = 1; msg.pitch = 1.2;
+            window.speechSynthesis.speak(msg);
         }
 
-        function playSfx(type) {
-            if(!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            const now = audioCtx.currentTime;
-
-            if(type === 'full') {
-                // Futuristic Success Chime (Two notes: C5 to G5)
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.3); // G5
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-                osc.start(); osc.stop(now + 0.6);
-            } else if(type === 'connect') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(); osc.stop(now + 0.2);
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+            if(chart) {
+                chart.data.datasets[0].borderColor = accent;
+                chart.data.datasets[0].backgroundColor = accent + '10';
+                chart.update();
             }
+        }
+
+        function toggleMode() {
+            const mode = document.documentElement.getAttribute('data-mode') === 'dark' ? 'white' : 'dark';
+            document.documentElement.setAttribute('data-mode', mode);
         }
 
         function updateClock() {
             const now = new Date();
-            let h = now.getHours(), m = now.getMinutes(), s = now.getSeconds(), ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12 || 12;
-            document.getElementById('live-time').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            document.getElementById('live-ampm').innerText = ampm;
-            const l = langData[currentLang];
-            document.getElementById('live-day').innerText = l.days[now.getDay()];
-            document.getElementById('live-date').innerText = `${now.getDate()} ${l.months[now.getMonth()]} ${now.getFullYear()}`;
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+            document.getElementById('date').innerText = now.toDateString();
         }
 
-        async function monitor() {
-            const battery = await navigator.getBattery();
-            const updateUI = () => {
-                const charging = battery.charging;
-                const level = Math.round(battery.level * 100);
+        async function initBattery() {
+            try {
+                battery = await navigator.getBattery();
+                const update = () => {
+                    const level = Math.round(battery.level * 100);
+                    const charging = battery.charging;
 
-                // USB Connection Detection Logic
-                document.getElementById('usb-lock').classList.toggle('lock-off', charging);
-                
-                // Play Connect Sound
-                if(charging && !lastChargingStatus) playSfx('connect');
-                lastChargingStatus = charging;
+                    document.getElementById('usb-lock').classList.toggle('lock-off', charging);
+                    document.getElementById('bat-level').innerText = level + '%';
+                    document.getElementById('fluid-bg').style.height = level + '%';
+                    
+                    // Update 3D Icon Liquid
+                    const liquid = document.getElementById('liquid-level');
+                    liquid.setAttribute('height', (level * 0.75));
+                    liquid.setAttribute('y', 90 - (level * 0.75));
 
-                // FULL CHARGE SOUND LOGIC
-                if (level >= 100 && charging) {
-                    if (!hasAnnouncedFull) {
-                        playSfx('full');
-                        hasAnnouncedFull = true;
+                    document.getElementById('bat-status').innerText = charging ? "Flowing Energy" : "Power Disconnected";
+
+                    if(level === 100 && lastLevel < 100) speak("Battery Full");
+                    lastLevel = level;
+
+                    if(chart) {
+                        chart.data.datasets[0].data.push(level);
+                        chart.data.datasets[0].data.shift();
+                        chart.update();
                     }
-                } else if (level < 100) {
-                    hasAnnouncedFull = false; // Reset trigger if battery drops
-                }
-
-                document.getElementById('bat-level').innerText = level + '%';
-                document.getElementById('fluid').style.height = level + '%';
-                
-                if (charging && battery.chargingTime !== Infinity) {
-                    let mins = Math.floor(battery.chargingTime / 60);
-                    document.getElementById('bat-time').innerText = mins + " mins to 100%";
-                } else {
-                    document.getElementById('bat-time').innerText = level >= 100 ? langData[currentLang].full : langData[currentLang].wait;
-                }
-            };
-            battery.onchargingchange = updateUI;
-            battery.onlevelchange = updateUI;
-            updateUI();
+                };
+                battery.onchargingchange = update;
+                battery.onlevelchange = update;
+                update();
+            } catch (e) {
+                unlockManual();
+            }
         }
 
-        function initChart() {
+        window.onload = () => {
+            setInterval(updateClock, 1000);
+            initBattery();
+            
             const ctx = document.getElementById('chart').getContext('2d');
+            const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
             chart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: Array(10).fill(''), datasets: [{ data: Array(10).fill(0), borderColor: '#00d2ff', tension: 0.4, fill: true, backgroundColor: 'rgba(0,210,255,0.05)', pointRadius: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } } }
+                data: {
+                    labels: Array(15).fill(''),
+                    datasets: [{
+                        data: Array(15).fill(0),
+                        borderColor: accent,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: true,
+                        backgroundColor: accent + '10'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } },
+                    plugins: { legend: { display: false } }
+                }
             });
-        }
-
-        function toggleLang() { 
-            currentLang = currentLang === 'en' ? 'ms' : 'en'; 
-            updateClock(); 
-            document.getElementById('tip1').innerText = langData[currentLang].tip1;
-            document.getElementById('tip2').innerText = langData[currentLang].tip2;
-        }
-
-        window.onload = () => { updateClock(); setInterval(updateClock, 1000); monitor(); initChart(); };
+            setTheme('cyber');
+        };
     </script>
 </body>
 </html>
