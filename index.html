@@ -6,11 +6,11 @@
     
     <!-- 
         FiRCHARGE VERSION TRACKING 
-        WEB: 1.4.4-Precision
-        ANDROID: 1.4.4-v40
+        WEB: 1.4.6-Energy-Core
+        ANDROID: 1.4.6-v42
     -->
     
-    <title>FiRCHARGE Pro | Precision v1.4.4</title>
+    <title>FiRCHARGE Pro | Energy Core v1.4.6</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -33,16 +33,9 @@
             overflow-x: hidden;
         }
 
-        /* Handwriting Reveal Animation */
+        /* Handwriting Reveal */
         @keyframes reveal-sketch { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
         .animate-sketch { display: inline-block; animation: reveal-sketch 1.5s cubic-bezier(0.19, 1, 0.22, 1) forwards; }
-
-        /* Modal Reveal */
-        @keyframes modal-reveal {
-            from { opacity: 0; transform: scale(0.9) translateY(30px); filter: blur(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
-        }
-        .modal-active { display: flex !important; animation: modal-reveal 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
         .box-container {
             border: 1px solid var(--border);
@@ -54,20 +47,38 @@
         }
         .box-container:hover { transform: translateY(-5px); border-color: var(--accent); }
 
-        .pixar-3d { filter: drop-shadow(0 15px 12px rgba(0,0,0,0.25)); transition: 0.4s ease; }
-        .is-protected { filter: grayscale(1) brightness(0.6) !important; }
-
-        /* Energy Fill */
-        .energy-fill {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: linear-gradient(0deg, var(--accent) 0%, transparent 100%);
-            opacity: 0.2; transition: height 1.5s ease-in-out;
-            z-index: 0;
+        /* --- REALISTIC LIQUID ANIMATION --- */
+        .liquid-container {
+            position: absolute; inset: 0; 
+            border-radius: inherit; overflow: hidden;
+            z-index: 0; pointer-events: none;
+        }
+        .liquid-wave {
+            position: absolute; bottom: 0; left: 50%;
+            width: 250%; height: 250%;
+            background: var(--accent);
+            opacity: 0.15;
+            border-radius: 40%;
+            transform: translateX(-50%);
+            transition: bottom 2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .is-charging .liquid-wave {
+            animation: rotate-wave 10s infinite linear;
+        }
+        @keyframes rotate-wave {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
         }
 
-        /* Charging Pulse */
-        @keyframes bolt-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.1); } }
-        .charging-active { animation: bolt-pulse 2s infinite ease-in-out; }
+        /* --- ELECTRIC CHARGING ANIMATION --- */
+        .electric-bolt {
+            position: absolute; width: 100%; height: 100%;
+            top: 0; left: 0; z-index: 5;
+            opacity: 0; pointer-events: none;
+            filter: drop-shadow(0 0 8px var(--accent));
+        }
+        .is-charging .electric-bolt { opacity: 0.8; animation: flicker 0.2s infinite; }
+        @keyframes flicker { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.4; } }
 
         /* Lock Screen */
         #usb-lock {
@@ -86,7 +97,7 @@
             backdrop-filter: blur(20px); padding: 20px;
         }
 
-        .bat-text { font-size: clamp(4rem, 12vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 1; }
+        .bat-text { font-size: clamp(4rem, 12vw, 7rem); font-weight: 900; letter-spacing: -4px; line-height: 1; position: relative; z-index: 10; }
         .sketch-font { font-family: 'Architects Daughter', cursive; }
         .calligraphy { font-family: 'Caveat', cursive; }
         .theme-dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
@@ -103,17 +114,17 @@
                 <rect x="54" y="15" width="6" height="15" rx="2" fill="#fff" />
             </svg>
         </div>
-        <h1 class="text-2xl font-black uppercase sketch-font animate-sketch" id="lock-title">Initialize Power Link</h1>
-        <p class="calligraphy text-xl opacity-60 mt-2">v1.4.4 Precision Engine</p>
+        <h1 class="text-2xl font-black uppercase sketch-font animate-sketch" id="lock-title">Awaiting Neural Link</h1>
+        <p class="calligraphy text-xl opacity-60 mt-2">v1.4.6 Energy Core Active</p>
     </div>
 
     <!-- DETAIL MODAL -->
     <div id="detail-overlay" onclick="closeDetail()">
         <div class="box-container max-w-lg w-full bg-black/90 border-accent p-10 text-center" onclick="event.stopPropagation()">
             <div id="modal-icon" class="text-6xl mb-6">🔍</div>
-            <h2 id="modal-title" class="sketch-font text-3xl text-blue-400 mb-4">Precision Intel</h2>
+            <h2 id="modal-title" class="sketch-font text-3xl text-blue-400 mb-4">Core Intel</h2>
             <p id="modal-desc" class="calligraphy text-2xl opacity-90 leading-relaxed"></p>
-            <button onclick="closeDetail()" class="mt-8 px-10 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">Close Interface</button>
+            <button onclick="closeDetail()" class="mt-8 px-10 py-3 bg-blue-600 rounded-full font-black text-xs uppercase tracking-widest">Acknowledge</button>
         </div>
     </div>
 
@@ -124,7 +135,7 @@
             <div class="box-container flex flex-row items-center gap-4 w-full md:w-auto">
                 <div>
                     <h1 class="text-2xl font-black">FiR<span style="color:var(--accent)">CHARGE</span></h1>
-                    <p class="text-[9px] sketch-font text-blue-500 font-bold uppercase tracking-widest">Precision v1.4.4</p>
+                    <p class="text-[9px] sketch-font text-blue-500 font-bold uppercase tracking-widest">v1.4.6 Energy Core</p>
                 </div>
                 <div class="flex gap-2 border-l border-white/10 pl-4">
                     <div class="theme-dot" style="background:#00d2ff" onclick="setTheme('cyber')"></div>
@@ -145,40 +156,48 @@
         <!-- Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
             
-            <!-- Battery Core -->
-            <div class="box-container md:col-span-5 min-h-[420px] flex flex-col items-center justify-center" id="main-card" onclick="openDetail('battery')">
-                <div id="fluid-fill" class="energy-fill"></div>
+            <!-- Battery Centerpiece -->
+            <div class="box-container md:col-span-5 min-h-[440px] flex flex-col items-center justify-center" id="main-card" onclick="openDetail('battery')">
+                <div class="liquid-container">
+                    <div id="fluid-wave" class="liquid-wave"></div>
+                </div>
                 
-                <div class="pixar-3d w-44 h-44 mb-4 z-10" id="main-icon">
+                <div class="pixar-3d w-48 h-48 mb-4 z-10 relative" id="main-icon">
+                    <!-- ELECTRIC BOLTS SVG -->
+                    <svg class="electric-bolt" viewBox="0 0 100 100">
+                        <path d="M50 10 L45 35 L55 35 L50 60 L60 60 L45 90" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <path d="M20 30 L25 50 L15 50 L20 70" stroke="white" stroke-width="1.5" fill="none" opacity="0.6"/>
+                        <path d="M80 30 L75 50 L85 50 L80 70" stroke="white" stroke-width="1.5" fill="none" opacity="0.6"/>
+                    </svg>
+
                     <svg viewBox="0 0 100 100" class="w-full h-full">
                         <rect x="25" y="15" width="50" height="75" rx="15" fill="rgba(128,128,128,0.05)" stroke="var(--accent)" stroke-width="3"/>
                         <rect x="40" y="8" width="20" height="7" rx="3" fill="var(--accent)" />
-                        <rect id="svg-liquid" x="28" y="50" width="44" height="38" rx="10" fill="var(--accent)" />
-                        <path id="charge-bolt" d="M50 35 L40 55 L50 55 L45 75 L60 50 L50 50 L55 35 Z" fill="#fff" />
+                        <!-- Static Liquid for Icon -->
+                        <rect id="svg-liquid" x="28" y="50" width="44" height="38" rx="10" fill="var(--accent)" opacity="0.3"/>
                     </svg>
                 </div>
-                <div id="bat-level" class="bat-text z-10">0%</div>
-                <div id="status-tag" class="z-10 bg-blue-500/20 px-4 py-1 rounded-full text-[10px] font-black uppercase mt-4 animate-pulse tracking-widest">Scanning...</div>
+                <div id="bat-level" class="bat-text">0%</div>
+                <div id="status-tag" class="z-10 bg-blue-500/20 px-4 py-1 rounded-full text-[10px] font-black uppercase mt-4 animate-pulse">Scanning Signal</div>
             </div>
 
             <!-- Stats -->
             <div class="md:col-span-7 grid grid-cols-1 gap-5">
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- REALTIME REMAINING TIME -->
-                    <div class="box-container flex items-center gap-3" onclick="openDetail('time')">
-                        <div class="text-4xl">⌛</div>
-                        <div>
-                            <p class="text-[10px] opacity-40 font-bold uppercase" id="lbl-rem-title">Remaining</p>
-                            <p id="bat-time" class="text-xl font-black" style="color:var(--accent)">00m 00s</p>
-                        </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="box-container flex flex-col items-center p-4" onclick="openDetail('time')">
+                        <p class="text-[9px] opacity-40 font-bold uppercase mb-1">To Full</p>
+                        <p id="bat-time" class="text-lg font-black" style="color:var(--accent)">00m 00s</p>
                     </div>
-                    <div class="box-container flex items-center gap-3" onclick="openDetail('thermal')">
-                        <div class="text-4xl">🌡️</div>
-                        <div><p class="text-[10px] opacity-40 font-bold uppercase">Thermal</p><p class="text-xl font-black">27.5°C</p></div>
+                    <div class="box-container flex flex-col items-center p-4" onclick="openDetail('thermal')">
+                        <p class="text-[9px] opacity-40 font-bold uppercase mb-1">Thermal</p>
+                        <p class="text-lg font-black">27.5°C</p>
+                    </div>
+                    <div class="box-container flex flex-col items-center p-4" onclick="openDetail('mah')">
+                        <p class="text-[9px] opacity-40 font-bold uppercase mb-1">Capacity</p>
+                        <p id="bat-mah" class="text-lg font-black text-orange-400">5000 mAh</p>
                     </div>
                 </div>
 
-                <!-- Live Graph -->
                 <div class="box-container h-56" onclick="openDetail('graph')">
                     <p class="sketch-font text-xs uppercase opacity-40 mb-3 animate-sketch">Power Pulse Diagnostic</p>
                     <canvas id="chart"></canvas>
@@ -189,11 +208,11 @@
         <!-- Footer -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div class="box-container border-l-8" style="border-left-color:var(--accent)" onclick="openDetail('tip')">
-                <p class="calligraphy text-2xl opacity-80" id="tip-text">Precise time-to-full calculation active. Monitoring current wattage.</p>
+                <p class="calligraphy text-2xl opacity-80" id="tip-text">AI Energy Core is balancing the ionic distribution.</p>
             </div>
             <div class="box-container flex items-center justify-between px-6">
                 <button onclick="toggleLang()" class="sketch-font font-black uppercase text-xs">Lang: <span id="lang-label" style="color:var(--accent)">EN</span></button>
-                <div class="text-[9px] opacity-30 font-bold uppercase">FiRCHARGE Precision © 2025</div>
+                <button onclick="simulateFull()" class="text-[9px] opacity-20 border px-2 py-1 rounded">Test 100%</button>
             </div>
         </div>
 
@@ -208,41 +227,27 @@
 
         const translations = {
             en: {
-                lock: "Initialize Power Link",
-                battery_title: "Core Intel",
-                battery_desc: "The lithium core is absorbing current. Energy density is being monitored for stability.",
-                time_title: "Precision Timer",
-                time_desc: "Calculated based on real-time mA intake. Accuracy improves as charging stabilizes.",
-                thermal_title: "Thermal Mapping",
-                thermal_desc: "Sensors indicate optimal heat dissipation. No risk to cell longevity.",
-                graph_title: "Power Pulse",
-                graph_desc: "Real-time stability of current. Peaks represent fast-charge bursts.",
-                tip_title: "Expert Tip",
-                tip_desc: "For the longest lifespan, unplug your device once it reaches 100%. Neural protection is active.",
+                lock: "Awaiting Neural Link",
+                battery_title: "Liquid Core Intel",
+                battery_desc: "The liquid energy is flowing. Electric bolts indicate active ion migration through the lithium layers.",
+                mah_title: "Storage Capacity",
+                mah_desc: "5000 mAh represents the total 'bucket' size of your battery. Efficiency depends on cell health.",
                 voice_full: "Battery 100% full. Neural protection activated. Charging halted.",
                 voice_stop: "Charging stopped. System secured.",
-                voice_start: "Power linked. Energy flow initiated.",
+                voice_start: "Power linked. Energy core initiated.",
                 full_tag: "Protected", charging_tag: "Flowing", disc_tag: "Disconnected",
-                rem_title: "Remaining", wait: "Calculating...", full: "100% Ready",
                 lang: "EN"
             },
             ms: {
-                lock: "Mulakan Isyarat Kuasa",
-                battery_title: "Intel Teras",
-                battery_desc: "Teras lithium sedang menyerap arus. Ketumpatan tenaga dipantau untuk kestabilan.",
-                time_title: "Pemasa Tepat",
-                time_desc: "Dikira berdasarkan pengambilan mA masa nyata. Ketepatan meningkat apabila pengecasan stabil.",
-                thermal_title: "Pemetaan Terma",
-                thermal_desc: "Sensor menunjukkan pelesapan haba optimum. Tiada risiko kepada jangka hayat sel.",
-                graph_title: "Nadi Kuasa",
-                graph_desc: "Kestabilan tenaga masa nyata. Puncak menunjukkan letusan cas pantas.",
-                tip_title: "Tips Pakar",
-                tip_desc: "Untuk jangka hayat terlama, cabut peranti anda setelah mencapai 100%. Perlindungan neural aktif.",
+                lock: "Menunggu Sambungan",
+                battery_title: "Intel Teras Cecair",
+                battery_desc: "Tenaga cecair sedang mengalir. Kilat elektrik menunjukkan migrasi ion aktif melalui lapisan lithium.",
+                mah_title: "Kapasiti Simpanan",
+                mah_desc: "5000 mAh mewakili saiz 'baldi' bateri anda. Kecekapan bergantung kepada kesihatan sel.",
                 voice_full: "Bateri seratus peratus penuh. Perlindungan neural diaktifkan. Pengecasan dihentikan.",
                 voice_stop: "Pengecasan dihentikan. Sistem selamat.",
-                voice_start: "Kuasa disambung. Aliran tenaga bermula.",
+                voice_start: "Kuasa disambung. Teras tenaga dimulakan.",
                 full_tag: "Dilindungi", charging_tag: "Mengalir", disc_tag: "Terputus",
-                rem_title: "Baki Masa", wait: "Menghitung...", full: "100% Sedia",
                 lang: "BM"
             }
         };
@@ -261,14 +266,32 @@
         function openDetail(key) {
             const overlay = document.getElementById('detail-overlay');
             const t = translations[currentLang];
-            const icons = { battery: '🔋', time: '⌛', thermal: '🌡️', graph: '📊', tip: '💡' };
+            const icons = { battery: '🌊', time: '⌛', thermal: '🌡️', mah: '⚡', graph: '📊', tip: '💡' };
             document.getElementById('modal-icon').innerText = icons[key] || '🔍';
-            document.getElementById('modal-title').innerText = t[key + '_title'];
-            document.getElementById('modal-desc').innerText = t[key + '_desc'];
+            document.getElementById('modal-title').innerText = t[key + '_title'] || "Detail";
+            document.getElementById('modal-desc').innerText = t[key + '_desc'] || "Neural data link established.";
             overlay.classList.add('modal-active');
         }
 
         function closeDetail() { document.getElementById('detail-overlay').classList.remove('modal-active'); }
+
+        function simulateFull() { 
+            lastLevel = 99; 
+            handleAutoStop(); 
+            document.getElementById('bat-level').innerText = "100%";
+            document.getElementById('fluid-wave').style.bottom = "0%";
+        }
+
+        function handleAutoStop() {
+            if(isAutoStopped) return;
+            isAutoStopped = true;
+            const t = translations[currentLang];
+            document.getElementById('main-card').classList.remove('is-charging');
+            document.getElementById('status-tag').innerText = t.full_tag;
+            document.getElementById('status-tag').style.background = "#ef4444";
+            document.getElementById('main-card').classList.add('is-protected');
+            speak(t.voice_full);
+        }
 
         async function initBattery() {
             try {
@@ -279,39 +302,31 @@
                     const t = translations[currentLang];
 
                     document.getElementById('usb-lock').classList.toggle('lock-off', charging);
+                    document.getElementById('main-card').classList.toggle('is-charging', charging);
                     document.getElementById('bat-level').innerText = level + '%';
-                    document.getElementById('fluid-fill').style.height = level + '%';
                     
-                    const liquid = document.getElementById('svg-liquid');
-                    liquid.setAttribute('height', (level * 0.7));
-                    liquid.setAttribute('y', 90 - (level * 0.7));
+                    // Liquid Animation Height
+                    document.getElementById('fluid-wave').style.bottom = `-${100 - level}%`;
+                    
+                    const svgLiquid = document.getElementById('svg-liquid');
+                    svgLiquid.setAttribute('height', (level * 0.7));
+                    svgLiquid.setAttribute('y', 90 - (level * 0.7));
 
-                    // --- REALTIME TIME TO FULL CALCULATION ---
                     if (charging && battery.chargingTime !== Infinity) {
-                        const totalSeconds = battery.chargingTime;
-                        const mins = Math.floor(totalSeconds / 60);
-                        const secs = Math.floor(totalSeconds % 60);
+                        const totalSecs = battery.chargingTime;
+                        const mins = Math.floor(totalSecs / 60);
+                        const secs = Math.floor(totalSecs % 60);
                         document.getElementById('bat-time').innerText = `${mins}m ${secs}s`;
-                    } else if (level >= 100) {
-                        document.getElementById('bat-time').innerText = t.full;
                     } else {
-                        document.getElementById('bat-time').innerText = t.wait;
+                        document.getElementById('bat-time').innerText = "--";
                     }
 
-                    // Voice Notification
                     if(charging && !lastChargingState) speak(t.voice_start);
                     else if(!charging && lastChargingState) speak(t.voice_stop);
                     lastChargingState = charging;
 
-                    // Status UI
                     if(level >= 100 && charging) {
-                        if(!isAutoStopped) {
-                            isAutoStopped = true;
-                            speak(t.voice_full);
-                        }
-                        document.getElementById('status-tag').innerText = t.full_tag;
-                        document.getElementById('status-tag').style.background = "#ef4444";
-                        document.getElementById('main-card').classList.add('is-protected');
+                        handleAutoStop();
                     } else if (!charging) {
                         isAutoStopped = false;
                         document.getElementById('status-tag').innerText = t.disc_tag;
@@ -322,7 +337,6 @@
                         document.getElementById('status-tag').innerText = t.charging_tag;
                         document.getElementById('status-tag').style.background = "rgba(59,130,246,0.2)";
                         document.getElementById('main-card').classList.remove('is-protected');
-                        document.getElementById('charge-bolt').classList.add('charging-active');
                     }
 
                     if(chart) { chart.data.datasets[0].data.push(level); chart.data.datasets[0].data.shift(); chart.update(); }
@@ -343,11 +357,8 @@
 
         function toggleLang() {
             currentLang = currentLang === 'en' ? 'ms' : 'en';
-            const t = translations[currentLang];
-            document.getElementById('lang-label').innerText = t.lang;
-            document.getElementById('lock-title').innerText = t.lock;
-            document.getElementById('lbl-rem-title').innerText = t.rem_title;
-            document.getElementById('tip-text').innerText = t.tip_desc;
+            document.getElementById('lang-label').innerText = translations[currentLang].lang;
+            document.getElementById('lock-title').innerText = translations[currentLang].lock;
         }
 
         function updateClock() {
@@ -366,6 +377,7 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } }, plugins: { legend: { display: false } } }
             });
             setTheme('cyber');
+            updateClock();
         };
     </script>
 </body>
